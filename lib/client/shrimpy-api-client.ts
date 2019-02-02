@@ -82,12 +82,12 @@ export class ShrimpyApiClient {
         return result.id;
     }
 
-    public async enableSubscription(userId: string): Promise<void> {
+    public async enableUser(userId: string): Promise<void> {
         const endpoint = `users/${userId}/enable`;
         await this._callEndpoint<any>(endpoint, 'POST', null, true);
     }
 
-    public async disableSubscription(userId: string): Promise<void> {
+    public async disableUser(userId: string): Promise<void> {
         const endpoint = `users/${userId}/disable`;
         await this._callEndpoint<any>(endpoint, 'POST', null, true);
     }
