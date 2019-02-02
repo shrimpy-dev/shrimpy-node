@@ -1,0 +1,53 @@
+{
+  "name": "shrimpy-node",
+  "version": "0.0.1",
+  "author": "Shrimpy",
+  "bugs": "https://github.com/shrimpy-dev/shrimpy-node/issues",
+  "contributors": [
+    {
+      "email": "matt@shrimpy.io",
+      "name": "Matthew Wesly",
+      "url": "https://www.shrimpy.io"
+    }
+  ],
+  "dependencies": {
+    "decimal.js": "^10.0.2",
+    "request": "^2.34.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "description": "Client for the Shrimpy API",
+  "devDependencies": {
+    "@types/request-promise-native": "^1.0.15",
+    "typescript": "^3.2.2"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "homepage": "https://github.com/shrimpy-dev/shrimpy-node",
+  "keywords": [
+    "API",
+    "shrimpy",
+    "bitcoin",
+    "exchange",
+    "trading",
+    "bittrex",
+    "kraken",
+    "coinbase",
+    "poloniex",
+    "binance",
+    "kucoin"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/shrimpy-dev/shrimpy-node.git"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}
