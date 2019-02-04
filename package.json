@@ -41,11 +41,11 @@
     "kucoin"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/index.js",
   "peerDependencies": {
     "decimal.js": "^10.0.2"
   },
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/shrimpy-dev/shrimpy-node.git"
