@@ -44,7 +44,7 @@ async function yourFunction() {
 ### Public Client
 
 ```js
-const Shrimpy = require('@shrimpy-node')
+const Shrimpy = require('shrimpy-node');
 const publicClient = new Shrimpy.ShrimpyApiClient();
 ```
 
@@ -55,7 +55,7 @@ The public client can only use public methods.
 ```js
 const publicKey = 'your_public_key';   // e.g. 12326758a39a720e15d064cab3c1f0a9332d107de453bd41926bb3acd565059e
 const privateKey = 'your_private_key'; // e.g. 6991cf4c9b518293429db0df6085d1731074bed8abccd7f0279a52fac5b0c1a8a2f6d28e11a50fbb1c6575d1407e637f9ad7c73fbddfa87c5d418fd58971f829
-const Shrimpy = require('@shrimpy-node')
+const Shrimpy = require('shrimpy-node');
 const privateClient = new Shrimpy.ShrimpyApiClient(publicKey, privateKey);
 ```
 
