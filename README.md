@@ -228,18 +228,29 @@ const strategy = await client.getStrategy(
 * [`setStrategy`](https://developers.shrimpy.io/docs/#set-the-strategy)
 ```js
 await client.setStrategy(
-    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8',                                                                 // userId
-    123,                                                                                                    // accountId
-    { isDynamic: false, allocations: [{ symbol: 'BTC', percent: '50' }, { symbol: 'ETH', percent: '50' }] } // strategy
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8',   // userId
+    123,                                      // accountId
+    {
+        isDynamic: false,
+        allocations: [
+            { symbol: 'BTC', percent: '50' },
+            { symbol: 'ETH', percent: '50' }
+        ]
+    }                                         // strategy
 );
 ```
 
 * [`allocate`](https://developers.shrimpy.io/docs/#allocating)
 ```js
 await client.allocate(
-    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8',                                 // userId
-    123,                                                                    // accountId
-    { isDynamic: false, allocations: [{ symbol: 'USDT', percent: '100' }] } // strategy
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8',    // userId
+    123,                                       // accountId
+    {
+        isDynamic: false,
+        allocations: [
+            { symbol: 'USDT', percent: '100' }
+        ]
+    }                                          // strategy
 );
 ```
 
@@ -270,3 +281,27 @@ const activeTrades = await client.getActiveTrades(
     123,                                    // exchangeAccountId
 );
 ```
+
+### Analytics Methods
+
+* [`getBacktestAssets`](https://developers.shrimpy.io/docs/#get-backtest-assets)
+```js
+const backtestAssets = await client.getBacktestAssets(
+    'kucoin' // exchange
+);
+```
+
+* [`runBacktest`](https://developers.shrimpy.io/docs/#run-backtest)
+```js
+const backtestResults = await client.runBacktest(
+    'binance',                                       // exchange
+    10,                                              // rebalancePeriod in hours
+    new Decimal(0.1),                                // fee in percent
+    new Date("2018-05-19T00:00:00.000Z"),            // startTime
+    new Date("2018-11-02T00:00:00.000Z"),            // endTime
+    new Decimal(5000),                               // initialValue in USD
+    [
+        { symbol: "BTC", percent: new Decimal(50) },
+        { symbol: "ETH", percent: new Decimal(50) }
+    ]                                                // allocations
+);

@@ -11,6 +11,9 @@ import {
     ITrade,
     ITradeChanges,
     IUser,
+    IAllocation,
+    IBacktestAsset,
+    IBacktestResult,
 } from "../models";
 import {
     IAccountBalanceDto,
@@ -21,10 +24,17 @@ import {
     ITickerDto,
     ITradeChangesDto,
     ITradeDto,
-    IUserDto,    
+    IUserDto,
+    IAllocationDto,
+    IBacktestResultDto,
+    IBacktestAssetDto,    
 } from "../dtos";
 import {
     AccountBalanceDtoConverter,
+    AllocationDtoConverter,
+    BacktestAssetDtoConverter,
+    BacktestDataPointDtoConverter,
+    DateDtoConverter,
     DecimalDtoConverter,
     StrategyDtoConverter,
     TickerDtoConverter,
@@ -35,6 +45,10 @@ import {
 
 export class ShrimpyApiClient {
     private _accountBalanceDtoConverter = new AccountBalanceDtoConverter();
+    private _allocationDtoConverter = new AllocationDtoConverter();
+    private _backtestAssetDtoConveter = new BacktestAssetDtoConverter();
+    private _backtestDataPointDtoConverter = new BacktestDataPointDtoConverter();
+    private _dateDtoConverter = new DateDtoConverter();
     private _decimalDtoConverter = new DecimalDtoConverter();
     private _userDtoConverter = new UserDtoConverter();
     private _strategyDtoConverter = new StrategyDtoConverter();
@@ -60,6 +74,68 @@ export class ShrimpyApiClient {
         return tickerDtos.map((tickerDto) => {
             return this._tickerDtoConverter.convertFromDto(tickerDto);
         });
+    }
+
+    public async getBacktestAssets(
+        exchange: string,
+        startTime?: Date,
+        endTime?: Date
+    ): Promise<IBacktestAsset[]> {
+        const endpoint = `analytics/backtest/${exchange}/assets`;
+        let parameters: { startTime?: string, endTime?: string } = {};
+        if (startTime) {
+            parameters.startTime = this._dateDtoConverter.convertToDto(startTime);
+        }
+        if (endTime) {
+            parameters.endTime = this._dateDtoConverter.convertToDto(endTime);
+        }
+        const backtestAssetDtos = await this._callEndpoint<IBacktestAssetDto[]>(endpoint, 'GET', parameters, true);
+        const result: IBacktestAsset[] = backtestAssetDtos.map((backtestAssetDto) => {
+            return this._backtestAssetDtoConveter.convertFromDto(backtestAssetDto);
+        });
+        return result;
+    }
+
+    public async runBacktest(
+        exchange: string,
+        rebalancePeriodHours: number,
+        fee: Decimal,
+        startTime: Date,
+        endTime: Date,
+        initialValue: Decimal,
+        allocations: IAllocation[]
+    ): Promise<IBacktestResult> {
+        const endpoint = `analytics/backtest/${exchange}/run`;
+        const allocationsDto = allocations.map((allocation) => {
+            return this._allocationDtoConverter.convertToDto(allocation);
+        });
+        const parameters: {
+            rebalancePeriod: number,
+            fee: string,
+            startTime: string,
+            endTime: string,
+            initialValue: string,
+            allocations: IAllocationDto[]
+        } = {
+            rebalancePeriod: rebalancePeriodHours,
+            fee: fee.toString(),
+            startTime: this._dateDtoConverter.convertToDto(startTime),
+            endTime: this._dateDtoConverter.convertToDto(endTime),
+            initialValue: initialValue.toString(),
+            allocations: allocationsDto,
+        };
+        const resultDto = await this._callEndpoint<IBacktestResultDto>(endpoint, 'POST', parameters, true);
+        const rebalanceData = resultDto.rebalanceData.map((dataPointDto) => {
+            return this._backtestDataPointDtoConverter.convertFromDto(dataPointDto);
+        });
+        const holdingData = resultDto.holdingData.map((dataPointDto) => {
+            return this._backtestDataPointDtoConverter.convertFromDto(dataPointDto);
+        });
+        const result: IBacktestResult = {
+            rebalanceData: rebalanceData,
+            holdingData: holdingData,
+        };
+        return result;
     }
 
     public async getUsers(): Promise<IUser[]> {
@@ -276,7 +352,11 @@ export class ShrimpyApiClient {
             method: method
         };
 
-        if (method == 'POST') {
+        if (method === 'GET' && parameters && Object.keys(parameters).length > 0) {
+            options.qs = parameters;
+        }
+
+        if (method === 'POST') {
             if (parameters) {
                 // only attach the body if there are parameters
                 // no parameters, send empty body
