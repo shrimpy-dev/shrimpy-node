@@ -235,6 +235,11 @@ export class ShrimpyApiClient {
         await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
     }
 
+    public async getIpWhitelistAddresses(userId: string): Promise<string[]> {
+        const endpoint = `users/${userId}/whitelist`;
+        return await this._callEndpoint<string[]>(endpoint, 'GET', null, true);
+    }
+
     public async rebalance(userId: string, accountId: number): Promise<void> {
         const endpoint = `users/${userId}/accounts/${accountId}/rebalance`;
         await this._callEndpoint<any>(endpoint, 'POST', null, true);

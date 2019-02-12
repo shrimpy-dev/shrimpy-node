@@ -182,6 +182,13 @@ await client.deleteAccount(
 );
 ```
 
+* [`getIpWhitelistAddresses`](https://developers.shrimpy.io/docs/#get-ip-whitelist-addresses)
+```js
+const IpAddresses = await client.getIpWhitelistAddresses(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8' // userId
+);
+```
+
 ### Trading Methods
 
 * [`getBalance`](https://developers.shrimpy.io/docs/#get-balance)
