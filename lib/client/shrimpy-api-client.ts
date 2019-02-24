@@ -68,8 +68,13 @@ export class ShrimpyApiClient {
         }
     }
 
+    public async getSupportedExchanges(): Promise<string[]> {
+        const endpoint = `exchanges`;
+        return await this._callEndpoint<string[]>(endpoint, 'GET', null, false);
+    }
+
     public async getTicker(exchange: string): Promise<ITicker[]> {
-        const endpoint = `${exchange}/ticker`;
+        const endpoint = `exchanges/${exchange}/ticker`;
         const tickerDtos = await this._callEndpoint<ITickerDto[]>(endpoint, 'GET', null, false);
         return tickerDtos.map((tickerDto) => {
             return this._tickerDtoConverter.convertFromDto(tickerDto);
@@ -284,6 +289,14 @@ export class ShrimpyApiClient {
         const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
         const strategyDto = await this._callEndpoint<IStrategyDto>(endpoint, 'GET', null, true);
         return this._strategyDtoConverter.convertFromDto(strategyDto);
+    }
+
+    public async clearStrategy(
+        userId: string,
+        accountId: number,
+    ): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
+        await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
     }
 
     public async allocate(

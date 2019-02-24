@@ -63,6 +63,12 @@ The private client can use public and private methods.
 
 ### Public Methods
 
+* [`getSupportedExchanges`](https://developers.shrimpy.io/docs/#get-supported-exchanges)
+
+```js
+const supportedExchanges = await client.getSupportedExchanges();
+```
+
 * [`getTicker`](https://developers.shrimpy.io/docs/#get-ticker)
 
 ```js
@@ -244,6 +250,14 @@ await client.setStrategy(
             { symbol: 'ETH', percent: '50' }
         ]
     }                                         // strategy
+);
+```
+
+* [`clearStrategy`](https://developers.shrimpy.io/docs/#clear-the-strategy)
+```js
+await client.clearStrategy(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8',   // userId
+    123                                       // accountId
 );
 ```
 
