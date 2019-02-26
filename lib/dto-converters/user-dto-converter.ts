@@ -16,7 +16,8 @@ export class UserDtoConverter implements IDtoConverter<IUserDto, IUser> {
         const result: IUser = {
             expirationDate: expirationDate,
             id: dto.id,
-            isEnabled: dto.isEnabled
+            isEnabled: dto.isEnabled,
+            name: dto.name,
         };
         return result;
     }
@@ -24,7 +25,8 @@ export class UserDtoConverter implements IDtoConverter<IUserDto, IUser> {
     public convertToDto(model: IUser): IUserDto {
         const result: IUserDto = {
             id: model.id,
-            isEnabled: model.isEnabled
+            isEnabled: model.isEnabled,
+            name: model.name,
         };
         if (model.expirationDate != null) {
             result.expirationDate = this._dateDtoConverter.convertToDto(model.expirationDate);

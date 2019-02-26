@@ -96,6 +96,13 @@ const user = await client.getUser(
 const userId = await client.createUser();
 ```
 
+* [`setUserName`](https://developers.shrimpy.io/docs/#naming-a-user)
+```js
+await client.setUserName(
+    'mycustomname' // name
+);
+```
+
 * [`enableUser`](https://developers.shrimpy.io/docs/#enabling-a-user)
 ```js
 await client.enableUser(

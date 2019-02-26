@@ -157,10 +157,22 @@ export class ShrimpyApiClient {
         return this._userDtoConverter.convertFromDto(userDto);
     }
 
-    public async createUser(): Promise<string> {
+    public async createUser(name?: string): Promise<string> {
         const endpoint = 'users';
-        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', null, true);
+        let parameters: { [key: string]: any } | null = null;
+        if (name) {
+            parameters = { name: name };
+        }
+        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', parameters, true);
         return result.id;
+    }
+
+    public async setUserName(userId: string, name: string): Promise<void> {
+        const endpoint = `users/${userId}/name`;
+        const parameters: { [key: string]: any } = {
+            name: name
+        };
+        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
     }
 
     public async enableUser(userId: string): Promise<void> {
