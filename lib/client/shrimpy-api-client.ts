@@ -1,33 +1,36 @@
 ﻿import Decimal from "decimal.js";
+import * as querystring from 'querystring';
 import * as rp from 'request-promise-native';
 import { AuthenticationProvider } from "./authentication-provider";
 import {
     IAccount,
     IAccountBalance,
+    IAllocation,
     IApiKeyPermissions,
     IApiKeys,
+    IBacktestAsset,
+    IBacktestResult,
+    IOrderBook,
     IStrategy,
     ITicker,
     ITrade,
     ITradeChanges,
     IUser,
-    IAllocation,
-    IBacktestAsset,
-    IBacktestResult,
 } from "../models";
 import {
     IAccountBalanceDto,
+    IAllocationDto,
+    IBacktestResultDto,
+    IBacktestAssetDto,    
     IGuidIdResultDto,
     INumberIdResultDto,
+    IOrderBookDto,
     IRebalancePeriodResultDto,
     IStrategyDto,
     ITickerDto,
     ITradeChangesDto,
     ITradeDto,
     IUserDto,
-    IAllocationDto,
-    IBacktestResultDto,
-    IBacktestAssetDto,    
 } from "../dtos";
 import {
     AccountBalanceDtoConverter,
@@ -36,6 +39,7 @@ import {
     BacktestDataPointDtoConverter,
     DateDtoConverter,
     DecimalDtoConverter,
+    OrderBookDtoConverter,
     StrategyDtoConverter,
     TickerDtoConverter,
     TradeChangesDtoConverter,
@@ -50,11 +54,12 @@ export class ShrimpyApiClient {
     private _backtestDataPointDtoConverter = new BacktestDataPointDtoConverter();
     private _dateDtoConverter = new DateDtoConverter();
     private _decimalDtoConverter = new DecimalDtoConverter();
-    private _userDtoConverter = new UserDtoConverter();
+    private _orderBookDtoConverter = new OrderBookDtoConverter();
     private _strategyDtoConverter = new StrategyDtoConverter();
     private _tickerDtoConverter = new TickerDtoConverter();
     private _tradeChangesDtoConverter = new TradeChangesDtoConverter();
     private _tradeDtoConverter = new TradeDtoConverter();
+    private _userDtoConverter = new UserDtoConverter();
 
     private _authenticationProvider: AuthenticationProvider | null = null;
 
@@ -81,13 +86,32 @@ export class ShrimpyApiClient {
         });
     }
 
+    public async getOrderBook(
+        exchange: string,
+        baseSymbol: string,
+        quoteSymbol: string,
+        limit?: number
+    ): Promise<IOrderBook> {
+        const endpoint = `market/orderbook`;
+        const parameters: { exchange: string, baseSymbol: string, quoteSymbol: string, limit?: number } = {
+            exchange: exchange,
+            baseSymbol: baseSymbol,
+            quoteSymbol: quoteSymbol,
+        };
+        if (limit) {
+            parameters.limit = limit;
+        }
+        const orderBookDto = await this._callEndpoint<IOrderBookDto>(endpoint, 'GET', parameters, true);
+        return this._orderBookDtoConverter.convertFromDto(orderBookDto);
+    }
+
     public async getBacktestAssets(
         exchange: string,
         startTime?: Date,
         endTime?: Date
     ): Promise<IBacktestAsset[]> {
         const endpoint = `analytics/backtest/${exchange}/assets`;
-        let parameters: { startTime?: string, endTime?: string } = {};
+        const parameters: { startTime?: string, endTime?: string } = {};
         if (startTime) {
             parameters.startTime = this._dateDtoConverter.convertToDto(startTime);
         }
@@ -373,9 +397,9 @@ export class ShrimpyApiClient {
         signed: boolean
     ): Promise<T> {
         
-        const pathname = "/v1/" + endPoint;
+        let requestPath = "/v1/" + endPoint;
         let options: rp.OptionsWithUri & { headers: { [key: string]: any }} = {
-            uri: "https://dev-api.shrimpy.io" + pathname,
+            uri: "https://dev-api.shrimpy.io" + requestPath,
             headers: {
                 'content-type': 'application/json',
             },
@@ -383,7 +407,9 @@ export class ShrimpyApiClient {
         };
 
         if (method === 'GET' && parameters && Object.keys(parameters).length > 0) {
-            options.qs = parameters;
+            const qs = '?' + querystring.stringify(parameters);
+            options.uri += qs;
+            requestPath += qs;
         }
 
         if (method === 'POST') {
@@ -403,7 +429,7 @@ export class ShrimpyApiClient {
             }
             const nonce = Date.now();
             const bodyString = options.body ? options.body : "";
-            const prehashString = pathname + method + nonce + bodyString;
+            const prehashString = requestPath + method + nonce + bodyString;
             const signature = this._authenticationProvider.sign(prehashString);
             options.headers['DEV-SHRIMPY-API-KEY'] = this._authenticationProvider.publicKey;
             options.headers['DEV-SHRIMPY-API-NONCE'] = nonce;

@@ -310,6 +310,17 @@ const activeTrades = await client.getActiveTrades(
 );
 ```
 
+### Market Methods
+
+* [`getOrderBook`](https://developers.shrimpy.io/docs/#get-order-book)
+```js
+const orderBook = await client.getOrderBook(
+    'kucoin', // exchange
+    'XLM',    // baseSymbol
+    'BTC',    // quoteSymbol
+);
+```
+
 ### Analytics Methods
 
 * [`getBacktestAssets`](https://developers.shrimpy.io/docs/#get-backtest-assets)

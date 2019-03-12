@@ -7,6 +7,8 @@ export * from './ibacktest-result-dto';
 export * from './idynamic-strategy-dto';
 export * from './iguid-id-result-dto';
 export * from './inumber-id-result-dto';
+export * from './iorder-book-dto';
+export * from './iorder-book-item-dto';
 export * from './irebalance-period-result-dto';
 export * from './istatic-strategy-dto';
 export * from './istrategy-dto';
