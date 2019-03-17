@@ -1,4 +1,5 @@
 ﻿import Decimal from "decimal.js";
+import { IExchangeApiError } from "./iexchange-api-error";
 
 export interface ITrade {
     id: string;
@@ -9,4 +10,5 @@ export interface ITrade {
     success: boolean;
     errorCode: number;
     errorMessage: string;
+    exchangeApiErrors: IExchangeApiError[];
 }

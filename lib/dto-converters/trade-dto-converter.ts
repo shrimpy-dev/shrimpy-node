@@ -16,6 +16,7 @@ export class TradeDtoConverter implements IDtoConverter<ITradeDto, ITrade> {
             status: dto.status,
             success: dto.success,
             toSymbol: dto.toSymbol,
+            exchangeApiErrors: dto.exchangeApiErrors,
         };
         return result;
     }
@@ -30,6 +31,7 @@ export class TradeDtoConverter implements IDtoConverter<ITradeDto, ITrade> {
             status: model.status,
             success: model.success,
             toSymbol: model.toSymbol,
+            exchangeApiErrors: model.exchangeApiErrors,
         };
         return result;
     }

@@ -8,6 +8,7 @@ export * from './ibacktest-asset';
 export * from './ibacktest-data-point';
 export * from './ibacktest-result';
 export * from './idynamic-strategy';
+export * from './iexchange-api-error';
 export * from './iorder-book';
 export * from './iorder-book-item';
 export * from './istatic-strategy';

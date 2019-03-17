@@ -1,4 +1,5 @@
-﻿
+﻿import { IExchangeApiError } from "../models/iexchange-api-error";
+
 export interface ITradeDto {
     id: string;
     fromSymbol: string;
@@ -8,4 +9,5 @@ export interface ITradeDto {
     success: boolean;
     errorCode: number;
     errorMessage: string;
+    exchangeApiErrors: IExchangeApiError[];
 }
