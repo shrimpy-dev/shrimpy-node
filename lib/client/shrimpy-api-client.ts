@@ -172,7 +172,7 @@ export class ShrimpyApiClient {
         exchange: string,
         baseTradingSymbol: string,
         quoteTradingSymbol: string,
-        interval: string,
+        interval: '1m' | '5m' | '15m' | '1h' | '6h' | '1d',
         startTime?: Date,
     ): Promise<ICandlestick[]> {
         const endpoint = `exchanges/${exchange}/candles`;

@@ -69,11 +69,51 @@ The private client can use public and private methods.
 const supportedExchanges = await client.getSupportedExchanges();
 ```
 
+* [`getExchangeAssets`](https://developers.shrimpy.io/docs/#get-exchange-assets)
+
+```js
+const exchangeAssets = await client.getExchangeAssets(
+    'coinbasepro' // exchange
+);
+```
+
+* [`getTradingPairs`](https://developers.shrimpy.io/docs/#get-trading-pairs)
+
+```js
+const tradingPairs = await client.getTradingPairs(
+    'coinbasepro' // exchange
+);
+```
+
+### Market Data Methods
+
 * [`getTicker`](https://developers.shrimpy.io/docs/#get-ticker)
 
 ```js
 const ticker = await client.getTicker(
     'kucoin' // exchange
+);
+```
+
+* [`getOrderBooks`](https://developers.shrimpy.io/docs/#get-order-books)
+
+```js
+const orderBooks = await client.getOrderBooks(
+    'bittrex',  // exchange
+    'XLM',      // baseSymbol
+    'BTC',      // quoteSymbol
+    10          // limit
+);
+```
+
+* [`getCandles`](https://developers.shrimpy.io/docs/#get-candles)
+
+```js
+const candles = await client.getCandles(
+    'bittrex',  // exchange
+    'XLM',      // baseTradingSymbol
+    'BTC',      // quoteTradingSymbol
+    '15m'       // interval
 );
 ```
 
@@ -204,6 +244,36 @@ const IpAddresses = await client.getIpWhitelistAddresses(
 
 ### Trading Methods
 
+* [`createTrade`](https://developers.shrimpy.io/docs/#creating-a-trade)
+```js
+const tradeId = await client.createTrade(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
+    123,                                    // accountId
+    'BTC',                                  // fromSymbol
+    'ETH',                                  // toSymbol
+    new Decimal('0.01')                     // amount of fromSymbol
+);
+```
+
+* [`getTrade`](https://developers.shrimpy.io/docs/#get-trade-status)
+```js
+const trade = await client.getTrade(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
+    123,                                    // exchangeAccountId
+    '72dff099-54c0-4a32-b046-5c19d4f55758'  // tradeId
+);
+```
+
+* [`getActiveTrades`](https://developers.shrimpy.io/docs/#list-active-trades)
+```js
+const activeTrades = await client.getActiveTrades(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
+    123,                                    // exchangeAccountId
+);
+```
+
+### Balance Methods
+
 * [`getBalance`](https://developers.shrimpy.io/docs/#get-balance)
 ```js
 const balance = await client.getBalance(
@@ -211,6 +281,16 @@ const balance = await client.getBalance(
     123                                     // accountId
 );
 ```
+
+* [`getTotalBalanceHistory`](https://developers.shrimpy.io/docs/#get-total-balance-history)
+```js
+const totalBalanceHistory = await client.getTotalBalanceHistory(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
+    123                                     // accountId
+);
+```
+
+### Asset Management Methods
 
 * [`rebalance`](https://developers.shrimpy.io/docs/#rebalancing)
 ```js
@@ -282,42 +362,45 @@ await client.allocate(
 );
 ```
 
-* [`createTrade`](https://developers.shrimpy.io/docs/#creating-a-trade)
+### Limit Order Methods
+
+* [`createOrder`](https://developers.shrimpy.io/docs/#place-a-limit-order)
 ```js
-const tradeId = await client.createTrade(
+const orderId = await client.createOrder(
     '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
     123,                                    // accountId
-    'BTC',                                  // fromSymbol
-    'ETH',                                  // toSymbol
-    new Decimal('0.01')                     // amount of fromSymbol
+    'BTC',                                  // baseSymbol
+    'ETH',                                  // quoteSymbol
+    new Decimal('0.01'),                    // quantity of baseSymbol
+    new Decimal('0.026'),                   // price
+    'SELL',                                 // side
+    'IOC',                                  // timeInForce
 );
 ```
 
-* [`getTrade`](https://developers.shrimpy.io/docs/#get-trade-status)
+* [`getOrder`](https://developers.shrimpy.io/docs/#get-limit-order-status)
 ```js
-const trade = await client.getTrade(
+const order = await client.getOrder(
     '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
-    123,                                    // exchangeAccountId
-    '72dff099-54c0-4a32-b046-5c19d4f55758'  // tradeId
+    123,                                    // accountId
+    '8c2a9401-eb5b-48eb-9ae2-e9e02c174058'  // orderId
 );
 ```
 
-* [`getActiveTrades`](https://developers.shrimpy.io/docs/#list-active-trades)
+* [`getOrders`](https://developers.shrimpy.io/docs/#list-open-orders)
 ```js
-const activeTrades = await client.getActiveTrades(
+const order = await client.getOrders(
     '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
-    123,                                    // exchangeAccountId
+    123                                     // accountId
 );
 ```
 
-### Market Methods
-
-* [`getOrderBook`](https://developers.shrimpy.io/docs/#get-order-book)
+* [`cancelOrder`](https://developers.shrimpy.io/docs/#cancel-a-limit-order)
 ```js
-const orderBook = await client.getOrderBook(
-    'kucoin', // exchange
-    'XLM',    // baseSymbol
-    'BTC',    // quoteSymbol
+const order = await client.cancelOrder(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
+    123,                                    // accountId
+    '8c2a9401-eb5b-48eb-9ae2-e9e02c174058'  // orderId
 );
 ```
 
@@ -344,3 +427,16 @@ const backtestResults = await client.runBacktest(
         { symbol: "ETH", percent: new Decimal(50) }
     ]                                                // allocations
 );
+```
+
+### Insight Methods
+
+* [`getAssetDominance`]()
+```js
+const assetDominance = await client.getAssetDominance();
+```
+
+* [`getAssetPopularity`]()
+```js
+const assetPopularity = await client.getAssetPopularity();
+```
