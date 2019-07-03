@@ -431,12 +431,12 @@ const backtestResults = await client.runBacktest(
 
 ### Insight Methods
 
-* [`getAssetDominance`]()
+* [`getAssetDominance`](https://developers.shrimpy.io/docs/#get-asset-dominance)
 ```js
 const assetDominance = await client.getAssetDominance();
 ```
 
-* [`getAssetPopularity`]()
+* [`getAssetPopularity`](https://developers.shrimpy.io/docs/#get-asset-dominance)
 ```js
 const assetPopularity = await client.getAssetPopularity();
 ```
