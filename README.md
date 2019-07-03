@@ -436,7 +436,7 @@ const backtestResults = await client.runBacktest(
 const assetDominance = await client.getAssetDominance();
 ```
 
-* [`getAssetPopularity`](https://developers.shrimpy.io/docs/#get-asset-dominance)
+* [`getAssetPopularity`](https://developers.shrimpy.io/docs/#get-asset-popularity)
 ```js
 const assetPopularity = await client.getAssetPopularity();
 ```
