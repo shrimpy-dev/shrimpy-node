@@ -1,5 +1,5 @@
 ﻿
-export interface ITradeChangeDto {
+export interface IBalanceChangeDto {
     nativeValue: string;
     symbol: string;
     usdValue: number;

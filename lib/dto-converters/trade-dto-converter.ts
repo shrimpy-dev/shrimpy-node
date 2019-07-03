@@ -17,6 +17,11 @@ export class TradeDtoConverter implements IDtoConverter<ITradeDto, ITrade> {
             success: dto.success,
             toSymbol: dto.toSymbol,
             exchangeApiErrors: dto.exchangeApiErrors,
+            maxSpreadPercent: this._decimalDtoConverter.convertFromDto(dto.maxSpreadPercent),
+            maxSlippagePercent: this._decimalDtoConverter.convertFromDto(dto.maxSlippagePercent),
+            smartRouting: dto.smartRouting,
+            triggeredMaxSpread: dto.triggeredMaxSpread,
+            triggeredMaxSlippage: dto.triggeredMaxSlippage,
         };
         return result;
     }
@@ -32,6 +37,11 @@ export class TradeDtoConverter implements IDtoConverter<ITradeDto, ITrade> {
             success: model.success,
             toSymbol: model.toSymbol,
             exchangeApiErrors: model.exchangeApiErrors,
+            maxSpreadPercent: this._decimalDtoConverter.convertToDto(model.maxSpreadPercent),
+            maxSlippagePercent: this._decimalDtoConverter.convertToDto(model.maxSlippagePercent),
+            smartRouting: model.smartRouting,
+            triggeredMaxSpread: model.triggeredMaxSpread,
+            triggeredMaxSlippage: model.triggeredMaxSlippage,
         };
         return result;
     }

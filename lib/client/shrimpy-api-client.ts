@@ -8,40 +8,64 @@ import {
     IAllocation,
     IApiKeyPermissions,
     IApiKeys,
+    IAssetInsight,
     IBacktestAsset,
     IBacktestResult,
-    IOrderBook,
+    ICandlestick,
+    IExchangeAsset,
+    IExchangeInfo,
+    ILimitOrder,
+    ILimitOrderStatus,
+    IMarketOrderBooks,
     IStrategy,
     ITicker,
+    ITotalBalanceHistoryItem,
     ITrade,
     ITradeChanges,
+    ITradingPair,
     IUser,
 } from "../models";
 import {
     IAccountBalanceDto,
+    IAccountDto,
     IAllocationDto,
+    IApiKeyPermissionsDto,
+    IApiKeysDto,
+    IAssetInsightDto,
     IBacktestResultDto,
-    IBacktestAssetDto,    
+    IBacktestAssetDto,
+    ICandlestickDto,
+    IExchangeAssetDto,
+    IExchangeInfoDto,
     IGuidIdResultDto,
+    ILimitOrderDto,
+    ILimitOrderStatusDto,
+    IMarketOrderBooksDto,
     INumberIdResultDto,
-    IOrderBookDto,
     IRebalancePeriodResultDto,
     IStrategyDto,
     ITickerDto,
+    ITotalBalanceHistoryItemDto,
     ITradeChangesDto,
     ITradeDto,
+    ITradingPairDto,
     IUserDto,
 } from "../dtos";
 import {
     AccountBalanceDtoConverter,
     AllocationDtoConverter,
+    AssetInsightDtoConverter,
     BacktestAssetDtoConverter,
     BacktestDataPointDtoConverter,
+    CandlestickDtoConverter,
     DateDtoConverter,
     DecimalDtoConverter,
-    OrderBookDtoConverter,
+    LimitOrderDtoConverter,
+    LimitOrderStatusDtoConverter,
+    MarketOrderBooksDtoConverter,
     StrategyDtoConverter,
     TickerDtoConverter,
+    TotalBalanceHistoryItemDtoConverter,
     TradeChangesDtoConverter,
     TradeDtoConverter,
     UserDtoConverter,
@@ -50,13 +74,18 @@ import {
 export class ShrimpyApiClient {
     private _accountBalanceDtoConverter = new AccountBalanceDtoConverter();
     private _allocationDtoConverter = new AllocationDtoConverter();
+    private _assetInsightDtoConverter = new AssetInsightDtoConverter();
     private _backtestAssetDtoConveter = new BacktestAssetDtoConverter();
     private _backtestDataPointDtoConverter = new BacktestDataPointDtoConverter();
+    private _candlestickDtoConverter = new CandlestickDtoConverter();
     private _dateDtoConverter = new DateDtoConverter();
     private _decimalDtoConverter = new DecimalDtoConverter();
-    private _orderBookDtoConverter = new OrderBookDtoConverter();
+    private _limitOrderDtoConverter = new LimitOrderDtoConverter();
+    private _limitOrderStatusDtoConverter = new LimitOrderStatusDtoConverter();
+    private _marketOrderBooksDtoConverter = new MarketOrderBooksDtoConverter();
     private _strategyDtoConverter = new StrategyDtoConverter();
     private _tickerDtoConverter = new TickerDtoConverter();
+    private _totalBalanceHistoryItemDtoConverter = new TotalBalanceHistoryItemDtoConverter();
     private _tradeChangesDtoConverter = new TradeChangesDtoConverter();
     private _tradeDtoConverter = new TradeDtoConverter();
     private _userDtoConverter = new UserDtoConverter();
@@ -73,10 +102,24 @@ export class ShrimpyApiClient {
         }
     }
 
-    public async getSupportedExchanges(): Promise<string[]> {
-        const endpoint = `exchanges`;
-        return await this._callEndpoint<string[]>(endpoint, 'GET', null, false);
+/* Public */
+
+    public async getSupportedExchanges(): Promise<IExchangeInfo[]> {
+        const endpoint = `list_exchanges`;
+        return await this._callEndpoint<IExchangeInfoDto[]>(endpoint, 'GET', null, false);
     }
+
+    public async getExchangeAssets(exchange: string): Promise<IExchangeAsset[]> {
+        const endpoint = `exchanges/${exchange}/assets`;
+        return await this._callEndpoint<IExchangeAssetDto[]>(endpoint, 'GET', null, false);
+    }
+
+    public async getTradingPairs(exchange: string): Promise<ITradingPair[]> {
+        const endpoint = `exchanges/${exchange}/trading_pairs`;
+        return await this._callEndpoint<ITradingPairDto[]>(endpoint, 'GET', null, false);
+    }
+
+/* Market Data */
 
     public async getTicker(exchange: string): Promise<ITicker[]> {
         const endpoint = `exchanges/${exchange}/ticker`;
@@ -86,24 +129,413 @@ export class ShrimpyApiClient {
         });
     }
 
-    public async getOrderBook(
-        exchange: string,
-        baseSymbol: string,
-        quoteSymbol: string,
+    public async getOrderBooks(
+        exchange: string | string[],
+        baseSymbol?: string | string[],
+        quoteSymbol?: string | string[],
         limit?: number
-    ): Promise<IOrderBook> {
-        const endpoint = `market/orderbook`;
-        const parameters: { exchange: string, baseSymbol: string, quoteSymbol: string, limit?: number } = {
-            exchange: exchange,
-            baseSymbol: baseSymbol,
-            quoteSymbol: quoteSymbol,
+    ): Promise<IMarketOrderBooks[]> {
+        const endpoint = `market/orderbooks`;
+        let exchangeString: string;
+        if (Array.isArray(exchange)) {
+            exchangeString = exchange.join(',');
+        } else {
+            exchangeString = exchange;
+        }
+        const parameters: { exchange: string, baseSymbol?: string, quoteSymbol?: string, limit?: number } = {
+            exchange: exchangeString
         };
+        if (baseSymbol) {
+            if (Array.isArray(baseSymbol)) {
+                parameters.baseSymbol = baseSymbol.join(',');
+            } else {
+                parameters.baseSymbol = baseSymbol;
+            }
+        }
+        if (quoteSymbol) {
+            if (Array.isArray(quoteSymbol)) {
+                parameters.quoteSymbol = quoteSymbol.join(',');
+            } else {
+                parameters.quoteSymbol = quoteSymbol;
+            }
+        }
         if (limit) {
             parameters.limit = limit;
         }
-        const orderBookDto = await this._callEndpoint<IOrderBookDto>(endpoint, 'GET', parameters, true);
-        return this._orderBookDtoConverter.convertFromDto(orderBookDto);
+        const orderBooksListDto = await this._callEndpoint<IMarketOrderBooksDto[]>(endpoint, 'GET', parameters, true);
+        return orderBooksListDto.map((orderBooksDto) => {
+            return this._marketOrderBooksDtoConverter.convertFromDto(orderBooksDto);
+        });
     }
+
+    public async getCandles(
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string,
+        interval: string,
+        startTime?: Date,
+    ): Promise<ICandlestick[]> {
+        const endpoint = `exchanges/${exchange}/candles`;
+        const parameters: {
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string,
+            interval: string,
+            startTime?: string,
+        } = {
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol,
+            interval: interval,
+        };
+        if (startTime) {
+            parameters.startTime = this._dateDtoConverter.convertToDto(startTime);
+        }
+        const candlestickDtos = await this._callEndpoint<ICandlestickDto[]>(endpoint, 'GET', parameters, false);
+        const result: ICandlestick[] = candlestickDtos.map((candlestickDto) => {
+            return this._candlestickDtoConverter.convertFromDto(candlestickDto);
+        });
+        return result;
+    }
+
+/* Users */
+
+    public async getUsers(): Promise<IUser[]> {
+        const endpoint = 'users';
+        const userDtos = await this._callEndpoint<IUserDto[]>(endpoint, 'GET', null, true);
+        return userDtos.map((userDto) => {
+            return this._userDtoConverter.convertFromDto(userDto);
+        });
+    }
+
+    public async getUser(userId: string): Promise<IUser> {
+        const endpoint = `users/${userId}`;
+        const userDto = await this._callEndpoint<IUserDto>(endpoint, 'GET', null, true);
+        return this._userDtoConverter.convertFromDto(userDto);
+    }
+
+    public async createUser(name?: string): Promise<string> {
+        const endpoint = 'users';
+        let parameters: { [key: string]: any } | null = null;
+        if (name) {
+            parameters = { name: name };
+        }
+        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', parameters, true);
+        return result.id;
+    }
+
+    public async setUserName(userId: string, name: string): Promise<void> {
+        const endpoint = `users/${userId}/name`;
+        const parameters: { [key: string]: any } = {
+            name: name
+        };
+        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+    }
+
+    public async enableUser(userId: string): Promise<void> {
+        const endpoint = `users/${userId}/enable`;
+        await this._callEndpoint<any>(endpoint, 'POST', null, true);
+    }
+
+    public async disableUser(userId: string): Promise<void> {
+        const endpoint = `users/${userId}/disable`;
+        await this._callEndpoint<any>(endpoint, 'POST', null, true);
+    }
+
+/* User API Keys */
+
+    public async getApiKeys(userId: string): Promise<string[]> {
+        const endpoint = `users/${userId}/keys`;
+        return await this._callEndpoint<string[]>(endpoint, 'GET', null, true);
+    }
+
+    public async createApiKeys(userId: string): Promise<IApiKeys> {
+        const endpoint = `users/${userId}/keys`;
+        return await this._callEndpoint<IApiKeysDto>(endpoint, 'POST', null, true);
+    }
+
+    public async deleteApiKeys(userId: string, publicKey: string): Promise<void> {
+        const endpoint = `users/${userId}/keys/${publicKey}`;
+        return await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
+    }
+
+    public async getPermissions(userId: string, publicKey: string): Promise<IApiKeyPermissions> {
+        const endpoint = `users/${userId}/keys/${publicKey}/permissions`;
+        return await this._callEndpoint<IApiKeyPermissionsDto>(endpoint, 'GET', null, true);
+    }
+
+    public async setPermissions(
+        userId: string,
+        publicKey: string,
+        account: boolean,
+        trade: boolean,
+    ): Promise<void> {
+        const endpoint = `users/${userId}/keys/${publicKey}/permissions`;
+        const parameters: IApiKeyPermissionsDto = {
+            account: account,
+            trade: trade
+        };
+        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+    }
+
+/* Accounts */
+
+    public async getAccounts(userId: string): Promise<IAccount[]> {
+        const endpoint = `users/${userId}/accounts`;
+        return await this._callEndpoint<IAccountDto[]>(endpoint, 'GET', null, true);
+    }
+
+    public async getAccount(userId: string, accountId: number): Promise<IAccount> {
+        const endpoint = `users/${userId}/accounts/${accountId}`;
+        return await this._callEndpoint<IAccountDto>(endpoint, 'GET', null, true);
+    }
+
+    public async createAccount(
+        userId: string,
+        exchange: string,
+        publicKey: string,
+        privateKey: string,
+        passphrase?: string,
+    ): Promise<number> {
+        const endpoint = `users/${userId}/accounts`;
+        const parameters: { [key: string]: any } = {
+            exchange: exchange,
+            publicKey: publicKey,
+            privateKey: privateKey,
+            passphrase: passphrase,
+        };
+        const result = await this._callEndpoint<INumberIdResultDto>(endpoint, 'POST', parameters, true);
+        return result.id;
+    }
+
+    public async deleteAccount(userId: string, accountId: number): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}`;
+        await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
+    }
+
+    public async getIpWhitelistAddresses(userId: string): Promise<string[]> {
+        const endpoint = `users/${userId}/whitelist`;
+        return await this._callEndpoint<string[]>(endpoint, 'GET', null, true);
+    }
+
+/* Trading */
+
+    public async createTrade(
+        userId: string,
+        accountId: number,
+        fromSymbol: string,
+        toSymbol: string,
+        amount: Decimal,
+        smartRouting?: boolean,
+        maxSpreadPercent?: Decimal,
+        maxSlippagePercent?: Decimal,
+    ): Promise<string> {
+        const endpoint = `users/${userId}/accounts/${accountId}/trades`;
+        let parameters: {
+            fromSymbol: string,
+            toSymbol: string,
+            amount: string,
+            smartRouting?: boolean,
+            maxSpreadPercent?: string,
+            maxSlippagePercent?: string,
+        } = {
+            fromSymbol: fromSymbol,
+            toSymbol: toSymbol,
+            amount: this._decimalDtoConverter.convertToDto(amount),
+        };
+        if (smartRouting) {
+            parameters.smartRouting = smartRouting;
+        }
+        if (maxSpreadPercent) {
+            parameters.maxSpreadPercent = this._decimalDtoConverter.convertToDto(maxSpreadPercent);
+        }
+        if (maxSlippagePercent) {
+            parameters.maxSlippagePercent = this._decimalDtoConverter.convertToDto(maxSlippagePercent);
+        }
+        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', parameters, true);
+        return result.id;
+    }
+
+    public async getTrade(
+        userId: string,
+        accountId: number,
+        tradeId: string,
+    ): Promise<ITradeChanges> {
+        const endpoint = `users/${userId}/accounts/${accountId}/trades/${tradeId}`;
+        const tradeChangesDto = await this._callEndpoint<ITradeChangesDto>(endpoint, 'GET', null, true);
+        return this._tradeChangesDtoConverter.convertFromDto(tradeChangesDto);
+    }
+
+    public async getActiveTrades(userId: string, accountId: number): Promise<ITrade[]> {
+        const endpoint = `users/${userId}/accounts/${accountId}/trades`;
+        const tradeDtos = await this._callEndpoint<ITradeDto[]>(endpoint, 'GET', null, true);
+        return tradeDtos.map((tradeDto) => {
+            return this._tradeDtoConverter.convertFromDto(tradeDto);
+        });
+    }
+
+/* Balances */
+
+    public async getBalance(
+        userId: string,
+        accountId: number,
+        date?: Date
+    ): Promise<IAccountBalance> {
+        const endpoint = `users/${userId}/accounts/${accountId}/balance`;
+        let parameters: { date: string } | null = null;
+        if (date) {
+            parameters = { date: this._dateDtoConverter.convertToDto(date) };
+        }
+        const accountBalanceDto = await this._callEndpoint<IAccountBalanceDto>(endpoint, 'GET', parameters, true);
+        return this._accountBalanceDtoConverter.convertFromDto(accountBalanceDto);
+    }
+
+    public async getTotalBalanceHistory(
+        userId: string,
+        accountId: number,
+        startTime: Date | null,
+        endTime: Date | null
+    ): Promise<ITotalBalanceHistoryItem[]> {
+        const endpoint = `users/${userId}/accounts/${accountId}/total_balance_history`;
+        let parameters: {
+            startTime?: string,
+            endTime?: string
+        } | null = null;
+        if (startTime || endTime) {
+            parameters = {};
+            if (startTime) {
+                parameters.startTime = this._dateDtoConverter.convertToDto(startTime);
+            }
+            if (endTime) {
+                parameters.endTime = this._dateDtoConverter.convertToDto(endTime);
+            }
+        }
+        const totalBalanceHistoryDtos = await this._callEndpoint<ITotalBalanceHistoryItemDto[]>(endpoint, 'GET', parameters, true);
+        return totalBalanceHistoryDtos.map((totalBalanceHistoryDto) => {
+            return this._totalBalanceHistoryItemDtoConverter.convertFromDto(totalBalanceHistoryDto);
+        });
+    }
+
+/* Asset Management */
+
+    public async rebalance(userId: string, accountId: number): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}/rebalance`;
+        await this._callEndpoint<any>(endpoint, 'POST', null, true);
+    }
+
+    public async getRebalancePeriod(userId: string, accountId: number): Promise<number> {
+        const endpoint = `users/${userId}/accounts/${accountId}/rebalance_period`;
+        const result = await this._callEndpoint<IRebalancePeriodResultDto>(endpoint, 'GET', null, true);
+        return result.rebalancePeriod;
+    }
+
+    public async setRebalancePeriod(
+        userId: string,
+        accountId: number,
+        rebalancePeriodHours: number
+    ): Promise<void> {
+        // verify rebalancePeriodHours is an integer
+        if (!Number.isInteger(rebalancePeriodHours)) {
+            throw new Error("Invalid rebalance period. Rebalance period must be an integer");
+        }
+        const endpoint = `users/${userId}/accounts/${accountId}/rebalance_period`;
+        const parameters: { rebalancePeriod: number } = {
+            rebalancePeriod: rebalancePeriodHours
+        };
+        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+    }
+
+    public async getStrategy(
+        userId: string,
+        accountId: number,
+    ): Promise<IStrategy> {
+        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
+        const strategyDto = await this._callEndpoint<IStrategyDto>(endpoint, 'GET', null, true);
+        return this._strategyDtoConverter.convertFromDto(strategyDto);
+    }
+
+    public async setStrategy(
+        userId: string,
+        accountId: number,
+        strategy: IStrategy,
+    ): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
+        let parameters: IStrategyDto = this._strategyDtoConverter.convertToDto(strategy);
+        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+    }
+
+    public async clearStrategy(
+        userId: string,
+        accountId: number,
+    ): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
+        await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
+    }
+
+    public async allocate(
+        userId: string,
+        accountId: number,
+        strategy: IStrategy,
+    ): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}/allocate`;
+        let parameters: IStrategyDto = this._strategyDtoConverter.convertToDto(strategy);
+        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+    }
+
+/* Limit Orders */
+
+    public async createOrder(
+        userId: string,
+        accountId: number,
+        baseSymbol: string,
+        quoteSymbol: string,
+        quantity: Decimal,
+        price: Decimal,
+        side: "BUY" | "SELL",
+        timeInForce: "GTC" | "IOC"
+    ): Promise<string> {
+        const endpoint = `users/${userId}/accounts/${accountId}/orders`;
+        let parameters: { baseSymbol: string, quoteSymbol: string, quantity: string, price: string, side: string, timeInForce: string } = {
+            baseSymbol: baseSymbol,
+            quoteSymbol: quoteSymbol,
+            quantity: this._decimalDtoConverter.convertToDto(quantity),
+            price: this._decimalDtoConverter.convertToDto(price),
+            side: side,
+            timeInForce: timeInForce
+        };
+        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', parameters, true);
+        return result.id;
+    }
+
+    public async getOrder(
+        userId: string,
+        accountId: number,
+        orderId: string
+    ): Promise<ILimitOrderStatus> {
+        const endpoint = `users/${userId}/accounts/${accountId}/orders/${orderId}`;
+        const limitOrderStatusDto = await this._callEndpoint<ILimitOrderStatusDto>(endpoint, 'GET', null, true);
+        return this._limitOrderStatusDtoConverter.convertFromDto(limitOrderStatusDto);
+    }
+
+    public async getOrders(
+        userId: string,
+        accountId: number
+    ): Promise<ILimitOrder[]> {
+        const endpoint = `users/${userId}/accounts/${accountId}/orders`;
+        const limitOrderDtos = await this._callEndpoint<ILimitOrderDto[]>(endpoint, 'GET', null, true);
+        return limitOrderDtos.map((limitOrderDto) => {
+            return this._limitOrderDtoConverter.convertFromDto(limitOrderDto);
+        });
+    }
+
+    public async cancelOrder(
+        userId: string,
+        accountId: number,
+        orderId: string
+    ): Promise<void> {
+        const endpoint = `users/${userId}/accounts/${accountId}/orders/${orderId}`;
+        await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
+    }
+
+/* Analytics */
 
     public async getBacktestAssets(
         exchange: string,
@@ -167,224 +599,25 @@ export class ShrimpyApiClient {
         return result;
     }
 
-    public async getUsers(): Promise<IUser[]> {
-        const endpoint = 'users';
-        const userDtos = await this._callEndpoint<IUserDto[]>(endpoint, 'GET', null, true);
-        return userDtos.map((userDto) => {
-            return this._userDtoConverter.convertFromDto(userDto);
+/* Insights */
+
+    public async getAssetDominance(): Promise<IAssetInsight[]> {
+        const endpoint = `insights/asset_dominance`;
+        const assetInsightDtos = await this._callEndpoint<IAssetInsightDto[]>(endpoint, 'GET', null, true);
+        return assetInsightDtos.map((assetInsightDto) => {
+            return this._assetInsightDtoConverter.convertFromDto(assetInsightDto);
         });
     }
 
-    public async getUser(userId: string): Promise<IUser> {
-        const endpoint = `users/${userId}`;
-        const userDto = await this._callEndpoint<IUserDto>(endpoint, 'GET', null, true);
-        return this._userDtoConverter.convertFromDto(userDto);
-    }
-
-    public async createUser(name?: string): Promise<string> {
-        const endpoint = 'users';
-        let parameters: { [key: string]: any } | null = null;
-        if (name) {
-            parameters = { name: name };
-        }
-        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', parameters, true);
-        return result.id;
-    }
-
-    public async setUserName(userId: string, name: string): Promise<void> {
-        const endpoint = `users/${userId}/name`;
-        const parameters: { [key: string]: any } = {
-            name: name
-        };
-        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
-    }
-
-    public async enableUser(userId: string): Promise<void> {
-        const endpoint = `users/${userId}/enable`;
-        await this._callEndpoint<any>(endpoint, 'POST', null, true);
-    }
-
-    public async disableUser(userId: string): Promise<void> {
-        const endpoint = `users/${userId}/disable`;
-        await this._callEndpoint<any>(endpoint, 'POST', null, true);
-    }
-
-    public async createApiKeys(userId: string): Promise<IApiKeys> {
-        const endpoint = `users/${userId}/keys`;
-        return await this._callEndpoint<IApiKeys>(endpoint, 'POST', null, true);
-    }
-
-    public async deleteApiKeys(userId: string, publicKey: string): Promise<void> {
-        const endpoint = `users/${userId}/keys/${publicKey}`;
-        return await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
-    }
-
-    public async getApiKeys(userId: string): Promise<string[]> {
-        const endpoint = `users/${userId}/keys`;
-        return await this._callEndpoint<string[]>(endpoint, 'GET', null, true);
-    }
-
-    public async setPermissions(
-        userId: string,
-        publicKey: string,
-        account: boolean,
-        trade: boolean,
-    ): Promise<void> {
-        const endpoint = `users/${userId}/keys/${publicKey}/permissions`;
-        const parameters: IApiKeyPermissions = {
-            account: account,
-            trade: trade
-        };
-        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
-    }
-
-    public async getPermissions(userId: string, publicKey: string): Promise<IApiKeyPermissions> {
-        const endpoint = `users/${userId}/keys/${publicKey}/permissions`;
-        return await this._callEndpoint<IApiKeyPermissions>(endpoint, 'GET', null, true);
-    }
-
-    public async getAccounts(userId: string): Promise<IAccount[]> {
-        const endpoint = `users/${userId}/accounts`;
-        return await this._callEndpoint<IAccount[]>(endpoint, 'GET', null, true);
-    }
-
-    public async getAccount(userId: string, accountId: number): Promise<IAccount> {
-        const endpoint = `users/${userId}/accounts/${accountId}`;
-        return await this._callEndpoint<IAccount>(endpoint, 'GET', null, true);
-    }
-
-    public async createAccount(
-        userId: string,
-        exchange: string,
-        publicKey: string,
-        privateKey: string,
-        passphrase: string,
-    ): Promise<number> {
-        const endpoint = `users/${userId}/accounts`;
-        const parameters: { [key: string]: any } = {
-            exchange: exchange,
-            publicKey: publicKey,
-            privateKey: privateKey,
-            passphrase: passphrase,
-        };
-        const result = await this._callEndpoint<INumberIdResultDto>(endpoint, 'POST', parameters, true);
-        return result.id;
-    }
-
-    public async deleteAccount(userId: string, accountId: number): Promise<void> {
-        const endpoint = `users/${userId}/accounts/${accountId}`;
-        await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
-    }
-
-    public async getIpWhitelistAddresses(userId: string): Promise<string[]> {
-        const endpoint = `users/${userId}/whitelist`;
-        return await this._callEndpoint<string[]>(endpoint, 'GET', null, true);
-    }
-
-    public async rebalance(userId: string, accountId: number): Promise<void> {
-        const endpoint = `users/${userId}/accounts/${accountId}/rebalance`;
-        await this._callEndpoint<any>(endpoint, 'POST', null, true);
-    }
-
-    public async getRebalancePeriod(userId: string, accountId: number): Promise<number> {
-        const endpoint = `users/${userId}/accounts/${accountId}/rebalance_period`;
-        const result = await this._callEndpoint<IRebalancePeriodResultDto>(endpoint, 'GET', null, true);
-        return result.rebalancePeriod;
-    }
-
-    public async setRebalancePeriod(
-        userId: string,
-        accountId: number,
-        rebalancePeriodHours: number
-    ): Promise<void> {
-        // verify rebalancePeriodHours is an integer
-        if (!Number.isInteger(rebalancePeriodHours)) {
-            throw new Error("Invalid rebalance period. Rebalance period must be an integer");
-        }
-        const endpoint = `users/${userId}/accounts/${accountId}/rebalance_period`;
-        const parameters: { rebalancePeriod: number } = {
-            rebalancePeriod: rebalancePeriodHours
-        };
-        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
-    }
-
-    public async setStrategy(
-        userId: string,
-        accountId: number,
-        strategy: IStrategy,
-    ): Promise<void> {
-        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
-        let parameters: IStrategyDto = this._strategyDtoConverter.convertToDto(strategy);
-        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
-    }
-
-    public async getStrategy(
-        userId: string,
-        accountId: number,
-    ): Promise<IStrategy> {
-        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
-        const strategyDto = await this._callEndpoint<IStrategyDto>(endpoint, 'GET', null, true);
-        return this._strategyDtoConverter.convertFromDto(strategyDto);
-    }
-
-    public async clearStrategy(
-        userId: string,
-        accountId: number,
-    ): Promise<void> {
-        const endpoint = `users/${userId}/accounts/${accountId}/strategy`;
-        await this._callEndpoint<any>(endpoint, 'DELETE', null, true);
-    }
-
-    public async allocate(
-        userId: string,
-        accountId: number,
-        strategy: IStrategy,
-    ): Promise<void> {
-        const endpoint = `users/${userId}/accounts/${accountId}/allocate`;
-        let parameters: IStrategyDto = this._strategyDtoConverter.convertToDto(strategy);
-        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
-    }
-
-    public async createTrade(
-        userId: string,
-        accountId: number,
-        fromSymbol: string,
-        toSymbol: string,
-        amount: Decimal
-    ): Promise<string> {
-        const endpoint = `users/${userId}/accounts/${accountId}/trades`;
-        let parameters: { fromSymbol: string, toSymbol: string, amount: string } = {
-            fromSymbol: fromSymbol,
-            toSymbol: toSymbol,
-            amount: this._decimalDtoConverter.convertToDto(amount),
-        };
-        const result = await this._callEndpoint<IGuidIdResultDto>(endpoint, 'POST', parameters, true);
-        return result.id;
-    }
-
-    public async getActiveTrades(userId: string, accountId: number): Promise<ITrade[]> {
-        const endpoint = `users/${userId}/accounts/${accountId}/trades`;
-        const tradeDtos = await this._callEndpoint<ITradeDto[]>(endpoint, 'GET', null, true);
-        return tradeDtos.map((tradeDto) => {
-            return this._tradeDtoConverter.convertFromDto(tradeDto);
+    public async getAssetPopularity(): Promise<IAssetInsight[]> {
+        const endpoint = `insights/asset_popularity`;
+        const assetInsightDtos = await this._callEndpoint<IAssetInsightDto[]>(endpoint, 'GET', null, true);
+        return assetInsightDtos.map((assetInsightDto) => {
+            return this._assetInsightDtoConverter.convertFromDto(assetInsightDto);
         });
     }
 
-    public async getTrade(
-        userId: string,
-        accountId: number,
-        tradeId: string,
-    ): Promise<ITradeChanges> {
-        const endpoint = `users/${userId}/accounts/${accountId}/trades/${tradeId}`;
-        const tradeChangesDto = await this._callEndpoint<ITradeChangesDto>(endpoint, 'GET', null, true);
-        return this._tradeChangesDtoConverter.convertFromDto(tradeChangesDto);
-    }
-
-    public async getBalance(userId: string, accountId: number): Promise<IAccountBalance> {
-        const endpoint = `users/${userId}/accounts/${accountId}/balance`;
-        const accountBalanceDto = await this._callEndpoint<IAccountBalanceDto>(endpoint, 'GET', null, true);
-        return this._accountBalanceDtoConverter.convertFromDto(accountBalanceDto);
-    }
+/* private methods */
 
     private _setApiCredentials(publicKey: string, privateKey: string): void {
         this._authenticationProvider = new AuthenticationProvider(publicKey, privateKey);

@@ -1,7 +1,9 @@
-﻿import { ITradeDto } from "./itrade-dto";
-import { ITradeChangeDto } from "./itrade-change-dto";
+﻿import { IBalanceChangeDto } from "./ibalance-change-dto";
+import { ITradeDto } from "./itrade-dto";
+import { ITradeFillDto } from "./itrade-fill-dto";
 
 export interface ITradeChangesDto {
     trade: ITradeDto;
-    changes: ITradeChangeDto[];
+    changes: IBalanceChangeDto[];
+    fills: ITradeFillDto[];
 }

@@ -1,7 +1,9 @@
-﻿import { ITrade } from "./itrade";
-import { ITradeChange } from "./itrade-change";
+﻿import { IBalanceChange } from "./ibalance-change";
+import { ITrade } from "./itrade";
+import { ITradeFill } from "./itrade-fill";
 
 export interface ITradeChanges {
     trade: ITrade;
-    changes: ITradeChange[];
+    changes: IBalanceChange[];
+    fills: ITradeFill[];
 }

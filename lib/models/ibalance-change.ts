@@ -1,6 +1,6 @@
 ﻿import Decimal from "decimal.js";
 
-export interface ITradeChange {
+export interface IBalanceChange {
     nativeValue: Decimal;
     symbol: string;
     usdValue: number;

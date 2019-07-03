@@ -1,4 +1,4 @@
-﻿import { IExchangeApiError } from "../models/iexchange-api-error";
+﻿import { IExchangeApiErrorDto } from './iexchange-api-error-dto';
 
 export interface ITradeDto {
     id: string;
@@ -9,5 +9,10 @@ export interface ITradeDto {
     success: boolean;
     errorCode: number;
     errorMessage: string;
-    exchangeApiErrors: IExchangeApiError[];
+    exchangeApiErrors: IExchangeApiErrorDto[];
+    maxSpreadPercent: string;
+    maxSlippagePercent: string;
+    smartRouting: boolean;
+    triggeredMaxSpread: boolean;
+    triggeredMaxSlippage: boolean;
 }

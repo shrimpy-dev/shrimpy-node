@@ -11,4 +11,9 @@ export interface ITrade {
     errorCode: number;
     errorMessage: string;
     exchangeApiErrors: IExchangeApiError[];
+    maxSpreadPercent: Decimal;
+    maxSlippagePercent: Decimal;
+    smartRouting: boolean;
+    triggeredMaxSpread: boolean;
+    triggeredMaxSlippage: boolean;
 }
