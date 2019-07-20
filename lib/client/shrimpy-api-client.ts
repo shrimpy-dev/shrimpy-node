@@ -162,7 +162,7 @@ export class ShrimpyApiClient {
         if (limit) {
             parameters.limit = limit;
         }
-        const orderBooksListDto = await this._callEndpoint<IMarketOrderBooksDto[]>(endpoint, 'GET', parameters, true);
+        const orderBooksListDto = await this._callEndpoint<IMarketOrderBooksDto[]>(endpoint, 'GET', parameters, false);
         return orderBooksListDto.map((orderBooksDto) => {
             return this._marketOrderBooksDtoConverter.convertFromDto(orderBooksDto);
         });
@@ -627,7 +627,7 @@ export class ShrimpyApiClient {
         endPoint: string,
         method: 'GET' | 'POST' | 'DELETE',
         parameters: { [key: string]: any } | null,
-        signed: boolean
+        isSignRequired: boolean
     ): Promise<T> {
         
         let requestPath = "/v1/" + endPoint;
@@ -655,11 +655,11 @@ export class ShrimpyApiClient {
             }
         }
 
-        if (signed) {
-            // this method is signed, create the signature
-            if (!this._authenticationProvider) {
-                throw new Error(`Cannot send a request to ${endPoint} without api keys. Make sure to pass api keys to the ShrimpyApiClient constructor.`);
-            }
+        if (isSignRequired && !this._authenticationProvider) {
+            throw new Error(`Cannot send a request to ${endPoint} without api keys. Make sure to pass api keys to the ShrimpyApiClient constructor.`);
+        }
+
+        if (this._authenticationProvider) {
             const nonce = Date.now();
             const bodyString = options.body ? options.body : "";
             const prehashString = requestPath + method + nonce + bodyString;
