@@ -369,8 +369,8 @@ await client.allocate(
 const orderId = await client.createOrder(
     '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', // userId
     123,                                    // accountId
-    'BTC',                                  // baseSymbol
-    'ETH',                                  // quoteSymbol
+    'ETH',                                  // baseSymbol
+    'BTC',                                  // quoteSymbol
     new Decimal('0.01'),                    // quantity of baseSymbol
     new Decimal('0.026'),                   // price
     'SELL',                                 // side

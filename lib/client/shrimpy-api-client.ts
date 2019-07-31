@@ -135,7 +135,7 @@ export class ShrimpyApiClient {
         quoteSymbol?: string | string[],
         limit?: number
     ): Promise<IMarketOrderBooks[]> {
-        const endpoint = `market/orderbooks`;
+        const endpoint = `orderbooks`;
         let exchangeString: string;
         if (Array.isArray(exchange)) {
             exchangeString = exchange.join(',');
