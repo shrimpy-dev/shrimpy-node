@@ -1,6 +1,6 @@
 {
   "name": "shrimpy-node",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "author": "Shrimpy",
   "bugs": "https://github.com/shrimpy-dev/shrimpy-node/issues",
   "contributors": [
@@ -13,11 +13,13 @@
   "dependencies": {
     "decimal.js": "^10.0.2",
     "request": "^2.34.0",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "ws": "^7.1.1"
   },
   "description": "Client for the Shrimpy API",
   "devDependencies": {
     "@types/request-promise-native": "^1.0.15",
+    "@types/ws": "^6.0.1",
     "typescript": "^3.2.2"
   },
   "directories": {

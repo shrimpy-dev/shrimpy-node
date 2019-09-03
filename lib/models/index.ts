@@ -27,5 +27,8 @@ export * from './itotal-balance-history-item';
 export * from './itrade';
 export * from './itrade-changes';
 export * from './itrade-fill';
+export * from './itrade-item';
 export * from './itrading-pair';
+export * from './isubscription-request';
 export * from './iuser';
+export * from './iwebsocket-message';

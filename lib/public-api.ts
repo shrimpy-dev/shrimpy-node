@@ -1,3 +1,3 @@
 ﻿
-export { ShrimpyApiClient } from './client';
+export { ShrimpyApiClient, ShrimpyWsClient } from './client';
 export * from './models';

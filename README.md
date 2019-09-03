@@ -440,3 +440,39 @@ const assetDominance = await client.getAssetDominance();
 ```js
 const assetPopularity = await client.getAssetPopularity();
 ```
+
+## Websocket
+
+Users can access the Shrimpy websocket feed using the [`ShrimpyWsClient`](https://github.com/shrimpy-dev/shrimpy-node/blob/master/lib/client/shrimpy-ws-client.ts) class. A handler must be passed in on subscription
+that is responsible for processing incoming messages from the websocket stream. It is recommended that you simply send the message
+to another processing thread from your custom handler to prevent blocking the incoming message stream.
+
+The client handles pings to the Shrimpy server based on the [`API Documentation`](https://developers.shrimpy.io/docs/#websocket)
+
+```js
+import { ShrimpyWsClient, ISubscriptionRequest, IWebsocketMessage, IErrorMessage } from 'shrimpy-node';
+
+let errorHandler = (error: IErrorMessage) => { console.log(error) };
+let client = new ShrimpyWsClient(errorHandler);
+
+const subscribeData: ISubscriptionRequest = {
+	"type": "subscribe",
+	"pair": "btc-usd",
+	"exchange": "coinbasepro",
+	"channel": "trade"
+};
+
+const unsubscribeData : ISubscriptionRequest = {
+	"type": "unsubscribe",
+	"pair": "btc-usd",
+	"exchange": "coinbasepro",
+	"channel": "trade"
+};
+
+let handler = (msg: IWebsocketMessage) => { console.log(msg); };
+
+client.connect();
+client.subscribe(subscribeData, handler);
+client.unsubscribe(unsubscribeData);
+client.forceDisconnect();
+```
