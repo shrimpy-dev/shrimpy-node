@@ -227,17 +227,17 @@ export class ShrimpyApiClient {
         const parameters: { [key: string]: any } = {
             name: name
         };
-        await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+        return this._callEndpoint<any>(endpoint, 'POST', parameters, true);
     }
 
     public async enableUser(userId: string): Promise<void> {
         const endpoint = `users/${userId}/enable`;
-        await this._callEndpoint<any>(endpoint, 'POST', null, true);
+        return this._callEndpoint<any>(endpoint, 'POST', null, true);
     }
 
     public async disableUser(userId: string): Promise<void> {
         const endpoint = `users/${userId}/disable`;
-        await this._callEndpoint<any>(endpoint, 'POST', null, true);
+        return this._callEndpoint<any>(endpoint, 'POST', null, true);
     }
 
 /* User API Keys */
