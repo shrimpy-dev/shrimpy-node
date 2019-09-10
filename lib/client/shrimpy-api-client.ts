@@ -14,8 +14,13 @@ import {
     ICandlestick,
     IExchangeAsset,
     IExchangeInfo,
+    IHistoricalOrderBook,
+    IHistoricalInstrument,
+    IHistoricalTrade,
     ILimitOrder,
     ILimitOrderStatus,
+    IManagementStatus,
+    IManagementUsage,
     IMarketOrderBooks,
     IStrategy,
     ITicker,
@@ -38,6 +43,9 @@ import {
     IExchangeAssetDto,
     IExchangeInfoDto,
     IGuidIdResultDto,
+    IHistoricalOrderBookDto,
+    IHistoricalInstrumentDto,
+    IHistoricalTradeDto,
     ILimitOrderDto,
     ILimitOrderStatusDto,
     IMarketOrderBooksDto,
@@ -60,6 +68,9 @@ import {
     CandlestickDtoConverter,
     DateDtoConverter,
     DecimalDtoConverter,
+    HistoricalOrderBooksDtoConverter,
+    HistoricalInstrumentsDtoConverter,
+    HistoricalTradesDtoConverter,
     LimitOrderDtoConverter,
     LimitOrderStatusDtoConverter,
     MarketOrderBooksDtoConverter,
@@ -80,6 +91,9 @@ export class ShrimpyApiClient {
     private _candlestickDtoConverter = new CandlestickDtoConverter();
     private _dateDtoConverter = new DateDtoConverter();
     private _decimalDtoConverter = new DecimalDtoConverter();
+    private _historicalOrderBooksDtoConverter = new HistoricalOrderBooksDtoConverter();
+    private _historicalInstrumentsDtoConverter = new HistoricalInstrumentsDtoConverter();
+    private _historicalTradesDtoConverter = new HistoricalTradesDtoConverter();
     private _limitOrderDtoConverter = new LimitOrderDtoConverter();
     private _limitOrderStatusDtoConverter = new LimitOrderStatusDtoConverter();
     private _marketOrderBooksDtoConverter = new MarketOrderBooksDtoConverter();
@@ -617,6 +631,100 @@ export class ShrimpyApiClient {
         });
     }
 
+/* Historical */
+
+    public async getHistoricalTrades(
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string,
+        startTime: Date,
+        endTime: Date,
+        limit: number
+    ): Promise<IHistoricalTrade[]> {
+        const endpoint = `historical/trades`;
+        const parameters: {
+            exchange: string,
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string,
+            startTime: string,
+            endTime: string,
+            limit: number,
+        } = {
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol,
+            startTime: this._dateDtoConverter.convertToDto(startTime),
+            endTime: this._dateDtoConverter.convertToDto(endTime),
+            limit: limit,
+        };
+        const resultDto = await this._callEndpoint<IHistoricalTradeDto[]>(endpoint, 'GET', parameters, true);
+
+        return this._historicalTradesDtoConverter.convertFromDto(resultDto);
+    }
+
+    public async getHistoricalOrderBooks(
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string,
+        startTime: Date,
+        endTime: Date,
+        limit: number
+    ): Promise<IHistoricalOrderBook[]> {
+        const endpoint = `historical/orderbooks`;
+        const parameters: {
+            exchange: string,
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string,
+            startTime: string,
+            endTime: string,
+            limit: number,
+        } = {
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol,
+            startTime: this._dateDtoConverter.convertToDto(startTime),
+            endTime: this._dateDtoConverter.convertToDto(endTime),
+            limit: limit,
+        };
+        const resultDto = await this._callEndpoint<IHistoricalOrderBookDto[]>(endpoint, 'GET', parameters, true);
+
+        return this._historicalOrderBooksDtoConverter.convertFromDto(resultDto);
+    }
+
+    public async getHistoricalInstruments(
+        exchange?: string,
+        baseTradingSymbol?: string,
+        quoteTradingSymbol?: string
+    ): Promise<IHistoricalInstrument[]> {
+        const endpoint = `historical/instruments`;
+        const parameters: {
+            exchange?: string,
+            baseTradingSymbol?: string,
+            quoteTradingSymbol?: string
+        } = {
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol
+        };
+
+        const resultDto = await this._callEndpoint<IHistoricalInstrumentDto[]>(endpoint, 'GET', parameters, true);
+
+        return this._historicalInstrumentsDtoConverter.convertFromDto(resultDto);
+    }
+
+/* Management */
+
+    public async getStatus(): Promise<IManagementStatus> {
+        const endpoint = `management/status`;
+        return await this._callEndpoint<IManagementStatus>(endpoint, 'GET', null, true);
+    }
+
+    public async getUsage(): Promise<IManagementUsage> {
+        const endpoint = `management/usage`;
+        return await this._callEndpoint<IManagementUsage>(endpoint, 'GET', null, true);
+    }
+
+
 /* private methods */
 
     private _setApiCredentials(publicKey: string, privateKey: string): void {
@@ -629,7 +737,6 @@ export class ShrimpyApiClient {
         parameters: { [key: string]: any } | null,
         isSignRequired: boolean
     ): Promise<T> {
-        
         let requestPath = "/v1/" + endPoint;
         let options: rp.OptionsWithUri & { headers: { [key: string]: any }} = {
             uri: "https://dev-api.shrimpy.io" + requestPath,

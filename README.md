@@ -441,6 +441,49 @@ const assetDominance = await client.getAssetDominance();
 const assetPopularity = await client.getAssetPopularity();
 ```
 
+### Historical Methods
+
+* [`getHistoricalInstruments`](https://developers.shrimpy.io/docs/#get-historical-instruments)
+```js
+const instruments = await client.getHistoricalInstruments();
+```
+
+* [`getHistoricalTrades`](https://developers.shrimpy.io/docs/#get-historical-trades)
+```js
+const trades = await client.getHistoricalTrades(
+    'binance',                                      // exchange
+    'LTC',                                          // baseTradingSymbol
+    'BTC',                                          // quoteTradingSymbol
+    new Date("2018-05-19T00:00:00.000Z"),           // startTime
+    new Date("2018-11-02T00:00:00.000Z"),           // endTime
+    100                                             // limit
+);
+```
+
+* [`getHistoricalOrderBooks`](https://developers.shrimpy.io/docs/#get-historical-orderbooks)
+```js
+const orderbooks = await client.getHistoricalOrderBooks(
+    'binance',                                      // exchange
+    'LTC',                                          // baseTradingSymbol
+    'BTC',                                          // quoteTradingSymbol
+    new Date("2018-05-19T00:00:00.000Z"),           // startTime
+    new Date("2018-11-02T00:00:00.000Z"),           // endTime
+    100                                             // limit
+);
+```
+
+### API Management Methods
+
+* [`getStatus`](https://developers.shrimpy.io/docs/#get-status)
+```js
+const status = await client.getStatus();
+```
+
+* [`getUsage`](https://developers.shrimpy.io/docs/#get-usage)
+```js
+const usage = await client.getUsage();
+```
+
 ## Websocket
 
 Users can access the Shrimpy websocket feed using the [`ShrimpyWsClient`](https://github.com/shrimpy-dev/shrimpy-node/blob/master/lib/client/shrimpy-ws-client.ts) class. A handler must be passed in on subscription
