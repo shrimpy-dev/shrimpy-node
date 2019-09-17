@@ -73,7 +73,7 @@ export class ShrimpyWsClient {
         subscriptionRequest: ISubscriptionRequest,
         successCallback: (data: IWebsocketMessage) => void,
     ) {
-        if (this._websocket.OPEN) {
+        if (this._websocket.OPEN == this._websocket.readyState) {
             const topic = this._getTopic(subscriptionRequest);
             this._subscriptionCallbacks[topic] = successCallback;
             this._websocket.send(JSON.stringify(subscriptionRequest));
@@ -85,7 +85,14 @@ export class ShrimpyWsClient {
     ) {
         const topic = this._getTopic(unsubscriptionRequest);
         delete this._subscriptionCallbacks[topic];
-        this._websocket.send(JSON.stringify(unsubscriptionRequest));
+
+        if (this._websocket.OPEN == this._websocket.readyState) {
+            this._websocket.send(JSON.stringify(unsubscriptionRequest));
+        }
+    }
+
+    public getReadyState(): number {
+        return this._websocket.readyState;
     }
 
     private _getTopic(message: any): string {
