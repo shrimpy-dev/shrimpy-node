@@ -245,11 +245,15 @@ export class ShrimpyApiClient {
     }
 
     public async enableUser(userId: string): Promise<void> {
+        // Deprecated, this endpoint no longer has any functionality
+        // It has been preserved to avoid breaking deployments from library upgrades
         const endpoint = `users/${userId}/enable`;
         await this._callEndpoint<any>(endpoint, 'POST', null, true);
     }
 
     public async disableUser(userId: string): Promise<void> {
+        // Deprecated, this endpoint no longer has any functionality
+        // It has been preserved to avoid breaking deployments from library upgrades
         const endpoint = `users/${userId}/disable`;
         await this._callEndpoint<any>(endpoint, 'POST', null, true);
     }
