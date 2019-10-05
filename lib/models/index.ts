@@ -15,6 +15,7 @@ export * from './iexchange-api-error';
 export * from './iexchange-asset';
 export * from './iexchange-info';
 export * from './iexchange-order-book';
+export * from './ihistorical-candlestick';
 export * from './ihistorical-order-book';
 export * from './ihistorical-instrument';
 export * from './ihistorical-trade';

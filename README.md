@@ -495,21 +495,23 @@ The client handles pings to the Shrimpy server based on the [`API Documentation`
 ```js
 import { ShrimpyWsClient, ISubscriptionRequest, IWebsocketMessage, IErrorMessage } from 'shrimpy-node';
 
+
+let token = "6ET73KTKDO0..."
 let errorHandler = (error: IErrorMessage) => { console.log(error) };
-let client = new ShrimpyWsClient(errorHandler);
+let client = new ShrimpyWsClient(errorHandler, token);
 
 const subscribeData: ISubscriptionRequest = {
-	"type": "subscribe",
-	"pair": "btc-usd",
-	"exchange": "coinbasepro",
-	"channel": "trade"
+    "type": "subscribe",
+    "pair": "btc-usd",
+    "exchange": "coinbasepro",
+    "channel": "trade"
 };
 
 const unsubscribeData : ISubscriptionRequest = {
-	"type": "unsubscribe",
-	"pair": "btc-usd",
-	"exchange": "coinbasepro",
-	"channel": "trade"
+    "type": "unsubscribe",
+    "pair": "btc-usd",
+    "exchange": "coinbasepro",
+    "channel": "trade"
 };
 
 let handler = (msg: IWebsocketMessage) => { console.log(msg); };
@@ -518,4 +520,5 @@ client.connect();
 client.subscribe(subscribeData, handler);
 client.unsubscribe(unsubscribeData);
 client.forceDisconnect();
+
 ```

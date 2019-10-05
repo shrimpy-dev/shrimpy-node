@@ -10,6 +10,7 @@ export * from './date-dto-converter';
 export * from './decimal-dto-converter';
 export * from './dynamic-strategy-dto-converter';
 export * from './exchange-order-book-dto-converter';
+export * from './historical-candlestick-dto-converter';
 export * from './historical-orderbooks-dto-converter';
 export * from './historical-instruments-dto-converter';
 export * from './historical-trades-dto-converter';

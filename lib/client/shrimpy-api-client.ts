@@ -14,6 +14,7 @@ import {
     ICandlestick,
     IExchangeAsset,
     IExchangeInfo,
+    IHistoricalCandlestick,
     IHistoricalOrderBook,
     IHistoricalInstrument,
     IHistoricalTrade,
@@ -43,6 +44,7 @@ import {
     IExchangeAssetDto,
     IExchangeInfoDto,
     IGuidIdResultDto,
+    IHistoricalCandlestickDto,
     IHistoricalOrderBookDto,
     IHistoricalInstrumentDto,
     IHistoricalTradeDto,
@@ -58,6 +60,7 @@ import {
     ITradeDto,
     ITradingPairDto,
     IUserDto,
+    IWebsocketTokenDto,
 } from "../dtos";
 import {
     AccountBalanceDtoConverter,
@@ -68,6 +71,7 @@ import {
     CandlestickDtoConverter,
     DateDtoConverter,
     DecimalDtoConverter,
+    HistoricalCandlestickDtoConverter,
     HistoricalOrderBooksDtoConverter,
     HistoricalInstrumentsDtoConverter,
     HistoricalTradesDtoConverter,
@@ -91,6 +95,7 @@ export class ShrimpyApiClient {
     private _candlestickDtoConverter = new CandlestickDtoConverter();
     private _dateDtoConverter = new DateDtoConverter();
     private _decimalDtoConverter = new DecimalDtoConverter();
+    private _historicalCandlestickDtoConverter = new HistoricalCandlestickDtoConverter();
     private _historicalOrderBooksDtoConverter = new HistoricalOrderBooksDtoConverter();
     private _historicalInstrumentsDtoConverter = new HistoricalInstrumentsDtoConverter();
     private _historicalTradesDtoConverter = new HistoricalTradesDtoConverter();
@@ -695,6 +700,41 @@ export class ShrimpyApiClient {
         return this._historicalOrderBooksDtoConverter.convertFromDto(resultDto);
     }
 
+    public async getHistoricalCandles(
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string,
+        startTime: Date,
+        endTime: Date,
+        limit: number,
+        interval: '1m' | '5m' | '15m' | '1h' | '6h' | '1d'
+    ): Promise<IHistoricalCandlestick[]> {
+        const endpoint = `historical/candles`;
+        const parameters: {
+            exchange: string,
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string,
+            startTime: string,
+            endTime: string,
+            limit: number,
+            interval: '1m' | '5m' | '15m' | '1h' | '6h' | '1d'
+        } = {
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol,
+            startTime: this._dateDtoConverter.convertToDto(startTime),
+            endTime: this._dateDtoConverter.convertToDto(endTime),
+            limit: limit,
+            interval: interval
+        };
+        const resultDto = await this._callEndpoint<IHistoricalCandlestickDto[]>(endpoint, 'GET', parameters, true);
+        const result = resultDto.map((candlestick) => {
+            return this._historicalCandlestickDtoConverter.convertFromDto(candlestick);
+        });
+
+        return result;
+    }
+
     public async getHistoricalInstruments(
         exchange?: string,
         baseTradingSymbol?: string,
@@ -728,6 +768,14 @@ export class ShrimpyApiClient {
         return await this._callEndpoint<IManagementUsage>(endpoint, 'GET', null, true);
     }
 
+/* WebSocket */
+
+    public async getToken(): Promise<string> {
+        const endpoint = `ws/token`;
+        const websocketTokenResult =  await this._callEndpoint<IWebsocketTokenDto>(endpoint, 'GET', null, true);
+
+        return websocketTokenResult.token;
+    }
 
 /* private methods */
 
