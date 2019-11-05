@@ -492,13 +492,20 @@ to another processing thread from your custom handler to prevent blocking the in
 
 The client handles pings to the Shrimpy server based on the [`API Documentation`](https://developers.shrimpy.io/docs/#websocket)
 
+
 ```js
-import { ShrimpyWsClient, ISubscriptionRequest, IWebsocketMessage, IErrorMessage } from 'shrimpy-node';
+import { ShrimpyApiClient, ShrimpyWsClient, ISubscriptionRequest, IWebsocketMessage, IErrorMessage } from 'shrimpy-node';
 
 
-let token = "6ET73KTKDO0..."
 let errorHandler = (error: IErrorMessage) => { console.log(error) };
-let client = new ShrimpyWsClient(errorHandler, token);
+
+const publicKey = 'your_public_key';
+const privateKey = 'your_private_key';
+let shrimpyApiClient = new ShrimpyApiClient(publicKey, privateKey);
+
+// Fetch the token from the Shrimpy API
+let token = shrimpyApiClient.getToken();
+let shrimpyWsclient = new ShrimpyWsClient(errorHandler, token);
 
 const subscribeData: ISubscriptionRequest = {
     "type": "subscribe",
