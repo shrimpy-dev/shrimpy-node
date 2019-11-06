@@ -443,9 +443,22 @@ const assetPopularity = await client.getAssetPopularity();
 
 ### Historical Methods
 
+* [`getHistoricalCount`](https://developers.shrimpy.io/docs/#get-historical-count)
+```js
+const count = await client.getHistoricalCount(
+    'trade',                                        // type
+    'binance',                                      // exchange
+    'LTC',                                          // baseTradingSymbol
+    'BTC',                                          // quoteTradingSymbol
+    new Date("2018-05-19T01:00:00.000Z"),           // startTime
+    new Date("2018-11-02T02:00:00.000Z")            // endTime
+);
+```
+
 * [`getHistoricalInstruments`](https://developers.shrimpy.io/docs/#get-historical-instruments)
 ```js
 const instruments = await client.getHistoricalInstruments();
+const bittrexInstruments = await client.getHistoricalInstruments('bittrex');
 ```
 
 * [`getHistoricalTrades`](https://developers.shrimpy.io/docs/#get-historical-trades)

@@ -15,6 +15,7 @@ import {
     IExchangeAsset,
     IExchangeInfo,
     IHistoricalCandlestick,
+    IHistoricalCount,
     IHistoricalOrderBook,
     IHistoricalInstrument,
     IHistoricalTrade,
@@ -45,6 +46,7 @@ import {
     IExchangeInfoDto,
     IGuidIdResultDto,
     IHistoricalCandlestickDto,
+    IHistoricalCountDto,
     IHistoricalOrderBookDto,
     IHistoricalInstrumentDto,
     IHistoricalTradeDto,
@@ -754,6 +756,38 @@ export class ShrimpyApiClient {
         const resultDto = await this._callEndpoint<IHistoricalInstrumentDto[]>(endpoint, 'GET', parameters, true);
 
         return this._historicalInstrumentsDtoConverter.convertFromDto(resultDto);
+    }
+
+    public async getHistoricalCount(
+        type: 'trade' | 'orderbook',
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string,
+        startTime: Date,
+        endTime: Date
+    ): Promise<IHistoricalCount> {
+        const endpoint = `historical/count`;
+        const parameters: {
+            type: string,
+            exchange: string,
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string,
+            startTime: string,
+            endTime: string
+        } = {
+            type: type,
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol,
+            startTime: this._dateDtoConverter.convertToDto(startTime),
+            endTime: this._dateDtoConverter.convertToDto(endTime)
+        };
+        const countDto = await this._callEndpoint<IHistoricalCountDto>(endpoint, 'GET', parameters, true);
+        const result: IHistoricalCount = {
+            count: countDto.count
+        };
+
+        return result;
     }
 
 /* Management */

@@ -17,6 +17,7 @@ export * from './iexchange-info-dto';
 export * from './iexchange-order-book-dto';
 export * from './iguid-id-result-dto';
 export * from './ihistorical-candlestick-dto';
+export * from './ihistorical-count-dto';
 export * from './ihistorical-order-book-dto';
 export * from './ihistorical-instrument-dto';
 export * from './ihistorical-trade-dto';
