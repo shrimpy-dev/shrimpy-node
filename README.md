@@ -507,38 +507,60 @@ The client handles pings to the Shrimpy server based on the [`API Documentation`
 
 
 ```js
-import { ShrimpyApiClient, ShrimpyWsClient, ISubscriptionRequest, IWebsocketMessage, IErrorMessage } from 'shrimpy-node';
+const Shrimpy = require('shrimpy-node');
+let apiClient = null;
+let wsClient = null;
+let token = null;
 
+const publicKey = "<Public Key Here>";
+const privateKey = "<Private Key Here>";
 
-let errorHandler = (error: IErrorMessage) => { console.log(error) };
-
-const publicKey = 'your_public_key';
-const privateKey = 'your_private_key';
-let shrimpyApiClient = new ShrimpyApiClient(publicKey, privateKey);
-
-// Fetch the token from the Shrimpy API
-let token = shrimpyApiClient.getToken();
-let shrimpyWsclient = new ShrimpyWsClient(errorHandler, token);
-
-const subscribeData: ISubscriptionRequest = {
-    "type": "subscribe",
-    "pair": "btc-usd",
-    "exchange": "coinbasepro",
-    "channel": "trade"
+function handler(msg){
+    console.log(msg);
 };
 
-const unsubscribeData : ISubscriptionRequest = {
-    "type": "unsubscribe",
-    "pair": "btc-usd",
-    "exchange": "coinbasepro",
-    "channel": "trade"
+function subscribeWhenConnected(oData){
+
+    if (wsClient.getReadyState() === 1) {
+        console.log("Subcribing to the order book for ETH-BTC");
+        wsClient.subscribe(oData, handler);
+    } else {
+        console.log("waiting for ws connection...");
+        setTimeout(subscribeWhenConnected.bind(null, oData), 1000);
+    }
+
 };
 
-let handler = (msg: IWebsocketMessage) => { console.log(msg); };
+function unsubscribe(oData){
+    console.log("Unsubcribing now");
+    wsClient.unsubscribe(oData);
+    console.log("Stopping the application");
+    process.exit(1);
+};
 
-client.connect();
-client.subscribe(subscribeData, handler);
-client.unsubscribe(unsubscribeData);
-client.forceDisconnect();
+(async () => {
+
+    apiClient = new Shrimpy.ShrimpyApiClient(publicKey, privateKey);
+    token = await apiClient.getToken();
+    wsClient = new Shrimpy.ShrimpyWsClient(function (error) {
+        console.error(error);
+    }, token);
+
+    wsClient.connect();
+    subscribeWhenConnected({
+        "type": "subscribe",
+        "pair": "ETH-BTC",
+        "exchange": "coinbasepro",
+        "channel": "orderbook"
+    });
+
+    setTimeout(unsubscribe.bind(null, {
+        "type": "unsubscribe",
+        "pair": "ETH-BTC",
+        "exchange": "coinbasepro",
+        "channel": "orderbook"
+    }), 10000);
+
+})()
 
 ```
