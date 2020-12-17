@@ -22,6 +22,7 @@ export * from './ihistorical-instrument';
 export * from './ihistorical-trade';
 export * from './ilimit-order';
 export * from './ilimit-order-status';
+export * from './imanagement-credits';
 export * from './imanagement-status';
 export * from './imanagement-usage';
 export * from './imarket-order-books';

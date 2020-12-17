@@ -21,6 +21,7 @@ import {
     IHistoricalTrade,
     ILimitOrder,
     ILimitOrderStatus,
+    IManagementCredits,
     IManagementStatus,
     IManagementUsage,
     IMarketOrderBooks,
@@ -249,6 +250,11 @@ export class ShrimpyApiClient {
             name: name
         };
         await this._callEndpoint<any>(endpoint, 'POST', parameters, true);
+    }
+
+    public async removeUser(userId: string): Promise<void> {
+        const endpoint = `users/${userId}`;
+        await this._callEndpoint<any>(endpoint, 'DELETE', {}, true);
     }
 
     public async enableUser(userId: string): Promise<void> {
@@ -797,7 +803,14 @@ export class ShrimpyApiClient {
         return await this._callEndpoint<IManagementStatus>(endpoint, 'GET', null, true);
     }
 
+    public async getCredits(): Promise<IManagementCredits> {
+        const endpoint = `management/credits`;
+        return await this._callEndpoint<IManagementCredits>(endpoint, 'GET', null, true);
+    }
+
     public async getUsage(): Promise<IManagementUsage> {
+        // Deprecated, this endpoint no longer has any functionality
+        // It has been preserved to avoid breaking deployments from library upgrades
         const endpoint = `management/usage`;
         return await this._callEndpoint<IManagementUsage>(endpoint, 'GET', null, true);
     }

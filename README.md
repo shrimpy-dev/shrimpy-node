@@ -139,7 +139,15 @@ const userId = await client.createUser();
 * [`setUserName`](https://developers.shrimpy.io/docs/#naming-a-user)
 ```js
 await client.setUserName(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', //userId
     'mycustomname' // name
+);
+```
+
+* [`removeUser`](https://developers.shrimpy.io/docs/#removing-a-user)
+```js
+await client.removeUser(
+    '701e0d16-1e9e-42c9-b6a1-4cada1f395b8', //userId
 );
 ```
 
@@ -492,9 +500,9 @@ const orderbooks = await client.getHistoricalOrderBooks(
 const status = await client.getStatus();
 ```
 
-* [`getUsage`](https://developers.shrimpy.io/docs/#get-usage)
+* [`getCredits`](https://developers.shrimpy.io/docs/#get-credits)
 ```js
-const usage = await client.getUsage();
+const usage = await client.getCredits();
 ```
 
 ## Websocket
