@@ -28,6 +28,7 @@ export * from './imanagement-usage';
 export * from './imarket-order-books';
 export * from './iorder-book';
 export * from './iorder-book-item';
+export * from './iprediction';
 export * from './istatic-strategy';
 export * from './istrategy';
 export * from './iticker';

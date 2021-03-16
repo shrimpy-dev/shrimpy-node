@@ -25,6 +25,7 @@ import {
     IManagementStatus,
     IManagementUsage,
     IMarketOrderBooks,
+    IPrediction,
     IStrategy,
     ITicker,
     ITotalBalanceHistoryItem,
@@ -55,6 +56,7 @@ import {
     ILimitOrderStatusDto,
     IMarketOrderBooksDto,
     INumberIdResultDto,
+    IPredictionDto,
     IRebalancePeriodResultDto,
     IStrategyDto,
     ITickerDto,
@@ -81,6 +83,7 @@ import {
     LimitOrderDtoConverter,
     LimitOrderStatusDtoConverter,
     MarketOrderBooksDtoConverter,
+    PredictionDtoConverter,
     StrategyDtoConverter,
     TickerDtoConverter,
     TotalBalanceHistoryItemDtoConverter,
@@ -105,6 +108,7 @@ export class ShrimpyApiClient {
     private _limitOrderDtoConverter = new LimitOrderDtoConverter();
     private _limitOrderStatusDtoConverter = new LimitOrderStatusDtoConverter();
     private _marketOrderBooksDtoConverter = new MarketOrderBooksDtoConverter();
+    private _predictionDtoConverter = new PredictionDtoConverter();
     private _strategyDtoConverter = new StrategyDtoConverter();
     private _tickerDtoConverter = new TickerDtoConverter();
     private _totalBalanceHistoryItemDtoConverter = new TotalBalanceHistoryItemDtoConverter();
@@ -629,6 +633,28 @@ export class ShrimpyApiClient {
         };
         return result;
     }
+
+    public async getPredictions(
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string
+    ): Promise<IPrediction[]> {
+        const endpoint = `analytics/predict`;
+        const parameters: {
+            exchange: string,
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string
+        } = {
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol
+        }
+
+        const predictionsListDto = await this._callEndpoint<IPredictionDto>(endpoint, 'GET', parameters, true);
+        return predictionsListDto["predictions"].map((predictionDto) => {
+            return this._predictionDtoConverter.convertFromDto(predictionDto)
+        })
+    }       
 
 /* Insights */
 

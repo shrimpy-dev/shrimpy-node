@@ -27,6 +27,7 @@ export * from './imarket-order-books-dto';
 export * from './inumber-id-result-dto';
 export * from './iorder-book-dto';
 export * from './iorder-book-item-dto';
+export * from './iprediction-dto';
 export * from './irebalance-period-result-dto';
 export * from './istatic-strategy-dto';
 export * from './istrategy-dto';

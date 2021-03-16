@@ -20,7 +20,8 @@ export * from './market-order-books-dto-converter';
 export * from './nullable-date-dto-converter';
 export * from './nullable-decimal-dto-converter';
 export * from './order-book-dto-converter';
-export * from './order-book-item-dto-converter'
+export * from './order-book-item-dto-converter';
+export * from './prediction-dto-converter';
 export * from './static-strategy-dto-converter';
 export * from './strategy-dto-converter';
 export * from './ticker-dto-converter';
