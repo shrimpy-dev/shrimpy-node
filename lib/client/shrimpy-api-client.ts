@@ -25,7 +25,7 @@ import {
     IManagementStatus,
     IManagementUsage,
     IMarketOrderBooks,
-    IPrediction,
+    IPredictions,
     IStrategy,
     ITicker,
     ITotalBalanceHistoryItem,
@@ -56,7 +56,7 @@ import {
     ILimitOrderStatusDto,
     IMarketOrderBooksDto,
     INumberIdResultDto,
-    IPredictionDto,
+    IPredictionsDto,
     IRebalancePeriodResultDto,
     IStrategyDto,
     ITickerDto,
@@ -83,7 +83,7 @@ import {
     LimitOrderDtoConverter,
     LimitOrderStatusDtoConverter,
     MarketOrderBooksDtoConverter,
-    PredictionDtoConverter,
+    PredictionsDtoConverter,
     StrategyDtoConverter,
     TickerDtoConverter,
     TotalBalanceHistoryItemDtoConverter,
@@ -108,7 +108,7 @@ export class ShrimpyApiClient {
     private _limitOrderDtoConverter = new LimitOrderDtoConverter();
     private _limitOrderStatusDtoConverter = new LimitOrderStatusDtoConverter();
     private _marketOrderBooksDtoConverter = new MarketOrderBooksDtoConverter();
-    private _predictionDtoConverter = new PredictionDtoConverter();
+    private _predictionsDtoConverter = new PredictionsDtoConverter();
     private _strategyDtoConverter = new StrategyDtoConverter();
     private _tickerDtoConverter = new TickerDtoConverter();
     private _totalBalanceHistoryItemDtoConverter = new TotalBalanceHistoryItemDtoConverter();
@@ -638,7 +638,7 @@ export class ShrimpyApiClient {
         exchange: string,
         baseTradingSymbol: string,
         quoteTradingSymbol: string
-    ): Promise<IPrediction[]> {
+    ): Promise<IPredictions> {
         const endpoint = `analytics/predict`;
         const parameters: {
             exchange: string,
@@ -650,10 +650,8 @@ export class ShrimpyApiClient {
             quoteTradingSymbol: quoteTradingSymbol
         }
 
-        const predictionsListDto = await this._callEndpoint<IPredictionDto>(endpoint, 'GET', parameters, true);
-        return predictionsListDto["predictions"].map((predictionDto) => {
-            return this._predictionDtoConverter.convertFromDto(predictionDto)
-        })
+        const predictionsListDto = await this._callEndpoint<IPredictionsDto>(endpoint, 'GET', parameters, true);
+        return this._predictionsDtoConverter.convertFromDto(predictionsListDto)
     }       
 
 /* Insights */

@@ -1,4 +1,5 @@
-export interface IPrediction {
+
+export interface IPredictionItem{
     date: Date;
     prediction: number;
     updatedAt: Date
