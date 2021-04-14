@@ -651,7 +651,7 @@ export class ShrimpyApiClient {
         }
 
         const predictionsListDto = await this._callEndpoint<IPredictionsDto>(endpoint, 'GET', parameters, true);
-        return this._predictionsDtoConverter.convertFromDto(predictionsListDto)
+        return this._predictionsDtoConverter.convertFromDto(predictionsListDto);
     }       
 
 /* Insights */
