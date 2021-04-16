@@ -38,5 +38,6 @@ export * from './itrade-changes-dto';
 export * from './itrade-dto';
 export * from './itrade-fill-dto';
 export * from './itrading-pair-dto';
+export * from './itrend-dto';
 export * from './iuser-dto';
 export * from './iwebsocket-token-dto';
