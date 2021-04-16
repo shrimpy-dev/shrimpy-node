@@ -28,4 +28,5 @@ export * from './ticker-dto-converter';
 export * from './total-balance-history-item-dto-converter';
 export * from './trade-changes-dto-converter';
 export * from './trade-dto-converter';
+export * from './trend-dto-converter';
 export * from './user-dto-converter';

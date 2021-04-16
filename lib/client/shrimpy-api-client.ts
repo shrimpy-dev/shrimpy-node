@@ -32,6 +32,7 @@ import {
     ITrade,
     ITradeChanges,
     ITradingPair,
+    ITrend,
     IUser,
 } from "../models";
 import {
@@ -64,6 +65,7 @@ import {
     ITradeChangesDto,
     ITradeDto,
     ITradingPairDto,
+    ITrendDto,
     IUserDto,
     IWebsocketTokenDto,
 } from "../dtos";
@@ -90,6 +92,7 @@ import {
     TradeChangesDtoConverter,
     TradeDtoConverter,
     UserDtoConverter,
+    TrendDtoConverter,
 } from "../dto-converters";
 
 export class ShrimpyApiClient {
@@ -114,6 +117,7 @@ export class ShrimpyApiClient {
     private _totalBalanceHistoryItemDtoConverter = new TotalBalanceHistoryItemDtoConverter();
     private _tradeChangesDtoConverter = new TradeChangesDtoConverter();
     private _tradeDtoConverter = new TradeDtoConverter();
+    private _trendDtoConverter = new TrendDtoConverter();
     private _userDtoConverter = new UserDtoConverter();
 
     private _authenticationProvider: AuthenticationProvider | null = null;
@@ -652,7 +656,27 @@ export class ShrimpyApiClient {
 
         const predictionsListDto = await this._callEndpoint<IPredictionsDto>(endpoint, 'GET', parameters, true);
         return this._predictionsDtoConverter.convertFromDto(predictionsListDto);
-    }       
+    }    
+    
+    public async getTrend(
+        exchange: string,
+        baseTradingSymbol: string,
+        quoteTradingSymbol: string
+    ): Promise<ITrend> {
+        const endpoint = `analytics/trend`;
+        const parameters: {
+            exchange: string,
+            baseTradingSymbol: string,
+            quoteTradingSymbol: string
+        } = {
+            exchange: exchange,
+            baseTradingSymbol: baseTradingSymbol,
+            quoteTradingSymbol: quoteTradingSymbol
+        }
+
+        const trendDto = await this._callEndpoint<ITrendDto>(endpoint, 'GET', parameters, true);
+        return this._trendDtoConverter.convertFromDto(trendDto);
+    }   
 
 /* Insights */
 
