@@ -437,6 +437,15 @@ const backtestResults = await client.runBacktest(
 );
 ```
 
+* [`predictions`](https://developers.shrimpy.io/docs/#get-predictions)
+```js
+const predictions = await client.getPredictions(
+    'bittrex',                                      // exchange
+    'LTC',                                          // baseSymbol
+    'BTC'                                           // quoteSymbol                                    
+);
+```
+
 ### Insight Methods
 
 * [`getAssetDominance`](https://developers.shrimpy.io/docs/#get-asset-dominance)
