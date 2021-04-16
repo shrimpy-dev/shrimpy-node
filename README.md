@@ -437,6 +437,15 @@ const backtestResults = await client.runBacktest(
 );
 ```
 
+* [`getTrend`](https://developers.shrimpy.io/docs/#trend)
+```js
+const trendResults = await client.getTrend(
+    'binance',                                       # exchange
+    'BTC',                                           # base_symbol
+    'BIDR',                                          # quote_symbol                                            // rebalancePeriod in hours
+);
+```
+
 ### Insight Methods
 
 * [`getAssetDominance`](https://developers.shrimpy.io/docs/#get-asset-dominance)
