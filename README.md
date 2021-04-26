@@ -442,7 +442,16 @@ const backtestResults = await client.runBacktest(
 const predictions = await client.getPredictions(
     'bittrex',                                      // exchange
     'LTC',                                          // baseSymbol
-    'BTC'                                           // quoteSymbol                                    
+    'BTC'                                           // quoteSymbol
+)
+```
+
+* [`getTrend`](https://developers.shrimpy.io/docs/#trend)
+```js
+const trendResults = await client.getTrend(
+    'binance',                                       # exchange
+    'BTC',                                           # base_symbol
+    'BIDR',                                          # quote_symbol
 );
 ```
 
